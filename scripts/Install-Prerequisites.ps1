@@ -66,7 +66,6 @@ if ($isServer) {
     $features = @(
         'RSAT-AD-PowerShell'        # ActiveDirectory module
         'GPMC'                      # Group Policy Management Console
-        'RSAT-DNS-Server'           # DNS management (optional)
     )
 
     if (-not $isDomainJoined) {
