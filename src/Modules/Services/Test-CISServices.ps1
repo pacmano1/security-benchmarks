@@ -57,9 +57,12 @@ function Test-CISServices {
                 Actual   = "$startType (Status: $($svc.Status))"
                 Detail   = "Service: $serviceName"
             }
-        } catch [Microsoft.PowerShell.Commands.ServiceCommandException] {
-            # Service not installed - that's compliant for "Disabled" requirement
-            if ($expectedType -eq 'Disabled') {
+        } catch {
+            # Service not installed or inaccessible
+            $isNotFound = $_.Exception -is [Microsoft.PowerShell.Commands.ServiceCommandException] -or
+                          $_.Exception.Message -match 'Cannot find any service' -or
+                          $_.Exception.Message -match 'does not exist'
+            if ($isNotFound -and $expectedType -eq 'Disabled') {
                 [PSCustomObject]@{
                     Id       = $ctl.Id
                     Title    = $ctl.Title
@@ -69,7 +72,7 @@ function Test-CISServices {
                     Actual   = 'Not Installed'
                     Detail   = "Service $serviceName not found (compliant)"
                 }
-            } else {
+            } elseif ($isNotFound) {
                 [PSCustomObject]@{
                     Id       = $ctl.Id
                     Title    = $ctl.Title
@@ -79,16 +82,16 @@ function Test-CISServices {
                     Actual   = 'Not Installed'
                     Detail   = "Service $serviceName not found"
                 }
-            }
-        } catch {
-            [PSCustomObject]@{
-                Id       = $ctl.Id
-                Title    = $ctl.Title
-                Module   = $moduleName
-                Status   = 'Error'
-                Expected = $expectedType
-                Actual   = ''
-                Detail   = $_.Exception.Message
+            } else {
+                [PSCustomObject]@{
+                    Id       = $ctl.Id
+                    Title    = $ctl.Title
+                    Module   = $moduleName
+                    Status   = 'Error'
+                    Expected = $expectedType
+                    Actual   = ''
+                    Detail   = $_.Exception.Message
+                }
             }
         }
     }

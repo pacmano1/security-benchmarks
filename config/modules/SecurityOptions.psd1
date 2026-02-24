@@ -197,6 +197,7 @@
             Registry    = @{
                 Path     = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
                 Name     = 'LegalNoticeText'
+                Value    = 'This system is for authorized use only. By using this system, you consent to monitoring and agree to comply with all applicable policies. Unauthorized access is prohibited and may result in disciplinary action or prosecution.'
                 Type     = 'String'
                 Operator = 'NotEmpty'
             }
@@ -207,6 +208,7 @@
             Registry    = @{
                 Path     = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
                 Name     = 'LegalNoticeCaption'
+                Value    = 'NOTICE: Authorized Use Only'
                 Type     = 'String'
                 Operator = 'NotEmpty'
             }
