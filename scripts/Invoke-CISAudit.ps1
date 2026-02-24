@@ -23,20 +23,32 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+Clear-Host
+Write-Host ''
+Write-Host '  CIS Benchmark L1 - Compliance Audit' -ForegroundColor White
+Write-Host '  ====================================' -ForegroundColor DarkGray
+Write-Host ''
+
 # ── Import module ──
 $modulePath = Join-Path $ProjectRoot 'src' 'CISBenchmark.psm1'
 Import-Module $modulePath -Force
 
 # ── Initialize ──
+Write-Host '  [1/4] Initializing...' -ForegroundColor Cyan
 $config = Initialize-CISEnvironment -ProjectRoot $ProjectRoot -SkipPrereqCheck:$SkipPrereqCheck
 
 # ── Pre-flight connectivity ──
 if ($config.HaltOnConnectivityFailure -and -not $SkipPrereqCheck) {
+    Write-Host '  [2/4] Pre-flight connectivity check...' -ForegroundColor Cyan
     $connectivity = Test-AWSConnectivity
     if (-not $connectivity.Pass) {
+        Write-Host '    x  Pre-flight FAILED - aborting audit' -ForegroundColor Red
         Write-CISLog -Message 'Pre-flight connectivity check FAILED - aborting audit.' -Level Error
         exit 1
     }
+    Write-Host '    +  Connectivity OK' -ForegroundColor Green
+} else {
+    Write-Host '  [2/4] Pre-flight check skipped' -ForegroundColor DarkGray
 }
 
 # ── Determine which modules to audit ──
@@ -46,20 +58,23 @@ $modulesToAudit = if ($Modules) {
     $config.Modules.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key }
 }
 
-Write-CISLog -Message "Auditing modules: $($modulesToAudit -join ', ')" -Level Info
-
 # ── Run each module's Test function ──
+Write-Host "  [3/4] Auditing $($modulesToAudit.Count) modules..." -ForegroundColor Cyan
+Write-Host ''
+
 $allResults = @()
+$modIndex = 0
 
 foreach ($modName in $modulesToAudit) {
+    $modIndex++
     $testFunc = "Test-CIS$modName"
 
     if (-not (Get-Command $testFunc -ErrorAction SilentlyContinue)) {
-        Write-CISLog -Message "Audit function not found: $testFunc - skipping" -Level Warning
+        Write-Host "    -  $modName (function not found, skipped)" -ForegroundColor Yellow
         continue
     }
 
-    Write-CISLog -Message "-- Auditing: $modName --" -Level Info
+    Write-Host "    ~  $modName ..." -ForegroundColor DarkGray -NoNewline
 
     try {
         $moduleResults = & $testFunc
@@ -67,9 +82,19 @@ foreach ($modName in $modulesToAudit) {
             $allResults += $moduleResults
             $modPass = ($moduleResults | Where-Object { $_.Status -eq 'Pass' }).Count
             $modFail = ($moduleResults | Where-Object { $_.Status -eq 'Fail' }).Count
-            Write-CISLog -Message "$modName: $modPass passed, $modFail failed (of $($moduleResults.Count) controls)" -Level Info
+            $modSkip = ($moduleResults | Where-Object { $_.Status -eq 'Skipped' }).Count
+            Write-Host "`r    +  $modName" -ForegroundColor Green -NoNewline
+            Write-Host "  $modPass passed" -ForegroundColor Green -NoNewline
+            Write-Host " / $modFail failed" -ForegroundColor $(if ($modFail -gt 0) { 'Red' } else { 'Green' }) -NoNewline
+            if ($modSkip -gt 0) {
+                Write-Host " / $modSkip skipped" -ForegroundColor Yellow -NoNewline
+            }
+            Write-Host ''
+        } else {
+            Write-Host "`r    -  $modName (no results)" -ForegroundColor Yellow
         }
     } catch {
+        Write-Host "`r    x  $modName - $($_.Exception.Message)" -ForegroundColor Red
         Write-CISLog -Message "Error auditing $modName`: $_" -Level Error
         $allResults += [PSCustomObject]@{
             Id       = 'N/A'
@@ -83,14 +108,35 @@ foreach ($modName in $modulesToAudit) {
     }
 }
 
+Write-Host ''
+
 # ── Generate report ──
+Write-Host '  [4/4] Generating report...' -ForegroundColor Cyan
+
 if ($allResults.Count -gt 0) {
     $summary = Export-CISReport -Results $allResults -Formats $config.ReportFormats
-    Write-CISLog -Message '===========================================' -Level Info
-    Write-CISLog -Message "AUDIT COMPLETE - $($summary.Total) controls evaluated" -Level Info
-    Write-CISLog -Message "Passed: $($summary.Passed) | Failed: $($summary.Failed) | Skipped: $($summary.Skipped) | Errors: $($summary.Errors)" -Level Info
-    Write-CISLog -Message "Compliance: $($summary.PassPercent)%" -Level Info
-    Write-CISLog -Message '===========================================' -Level Info
+
+    Write-Host ''
+    Write-Host '  ====================================' -ForegroundColor DarkGray
+    Write-Host '  Audit Complete' -ForegroundColor White
+    Write-Host '  -----------------------------------' -ForegroundColor DarkGray
+    Write-Host "    Total:      $($summary.Total)" -ForegroundColor White
+    Write-Host "    Passed:     $($summary.Passed)" -ForegroundColor Green
+    Write-Host "    Failed:     $($summary.Failed)" -ForegroundColor $(if ($summary.Failed -gt 0) { 'Red' } else { 'Green' })
+    Write-Host "    Skipped:    $($summary.Skipped)" -ForegroundColor Yellow
+    Write-Host "    Errors:     $($summary.Errors)" -ForegroundColor $(if ($summary.Errors -gt 0) { 'Red' } else { 'White' })
+    Write-Host '  -----------------------------------' -ForegroundColor DarkGray
+    Write-Host "    Compliance: $($summary.PassPercent)%" -ForegroundColor $(
+        if ($summary.PassPercent -ge 90) { 'Green' }
+        elseif ($summary.PassPercent -ge 70) { 'Yellow' }
+        else { 'Red' }
+    )
+    Write-Host '  ====================================' -ForegroundColor DarkGray
+    Write-Host ''
+    Write-Host "  Report: $(Join-Path $config.ProjectRoot 'reports')" -ForegroundColor DarkGray
 } else {
-    Write-CISLog -Message 'No audit results - check that modules are enabled and config files exist.' -Level Warning
+    Write-Host ''
+    Write-Host '    !  No audit results' -ForegroundColor Yellow
+    Write-Host '       Check that modules are enabled and config files exist.' -ForegroundColor DarkGray
 }
+Write-Host ''

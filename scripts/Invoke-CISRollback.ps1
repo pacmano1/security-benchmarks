@@ -30,14 +30,23 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+Clear-Host
+Write-Host ''
+Write-Host '  CIS Benchmark L1 - Rollback' -ForegroundColor White
+Write-Host '  ============================' -ForegroundColor DarkGray
+Write-Host ''
+
 # ── Import module ──
 $modulePath = Join-Path $ProjectRoot 'src' 'CISBenchmark.psm1'
 Import-Module $modulePath -Force
 
-# ── Initialize (minimal — just logging + config) ──
+# ── Initialize (minimal - just logging + config) ──
+Write-Host '  [1/4] Initializing...' -ForegroundColor Cyan
 $config = Initialize-CISEnvironment -ProjectRoot $ProjectRoot -SkipPrereqCheck
 
 # ── Find backup ──
+Write-Host '  [2/4] Locating backup...' -ForegroundColor Cyan
+
 if (-not $BackupPath) {
     $backupsDir = Join-Path $ProjectRoot 'backups'
     $latest = Get-ChildItem -Path $backupsDir -Directory -Filter 'CIS-Backup-*' -ErrorAction SilentlyContinue |
@@ -46,46 +55,56 @@ if (-not $BackupPath) {
 
     if ($latest) {
         $BackupPath = $latest.FullName
-        Write-CISLog -Message "Using most recent backup: $BackupPath" -Level Info
+        Write-Host "    +  Found: $($latest.Name)" -ForegroundColor Green
     } else {
-        Write-CISLog -Message 'No backups found. Cannot rollback without a backup.' -Level Error
+        Write-Host '    x  No backups found. Cannot rollback.' -ForegroundColor Red
+        Write-Host ''
         exit 1
     }
+} else {
+    Write-Host "    +  Using: $(Split-Path $BackupPath -Leaf)" -ForegroundColor Green
 }
 
 # ── Confirmation ──
 if (-not $Force) {
     Write-Host ''
-    Write-Host '+========================================================+' -ForegroundColor Yellow
-    Write-Host '|  ROLLBACK: This will revert CIS Benchmark changes!   |' -ForegroundColor Yellow
-    Write-Host "|  Backup: $($BackupPath | Split-Path -Leaf)".PadRight(55) + '|' -ForegroundColor Yellow
+    Write-Host '  +----------------------------------------------------------+' -ForegroundColor Yellow
+    Write-Host '  |  ROLLBACK: This will revert CIS Benchmark changes!       |' -ForegroundColor Yellow
+    Write-Host "  |  Backup: $(($BackupPath | Split-Path -Leaf).PadRight(47))|" -ForegroundColor Yellow
     if ($Module) {
-        Write-Host "|  Module: $Module".PadRight(55) + '|' -ForegroundColor Yellow
+        Write-Host "  |  Module: $($Module.PadRight(47))|" -ForegroundColor Yellow
     }
     if ($RemoveGPOs) {
-        Write-Host '|  Mode: REMOVE GPOs entirely                          |' -ForegroundColor Red
+        Write-Host '  |  Mode:   REMOVE GPOs entirely                           |' -ForegroundColor Red
     } else {
-        Write-Host '|  Mode: Restore GPOs to pre-apply state               |' -ForegroundColor Yellow
+        Write-Host '  |  Mode:   Restore GPOs to pre-apply state                |' -ForegroundColor Yellow
     }
-    Write-Host '+========================================================+' -ForegroundColor Yellow
+    Write-Host '  +----------------------------------------------------------+' -ForegroundColor Yellow
     Write-Host ''
 
-    $confirm = Read-Host 'Type YES to proceed with rollback'
+    $confirm = Read-Host '  Type YES to proceed with rollback'
     if ($confirm -ne 'YES') {
-        Write-CISLog -Message 'Rollback cancelled by user.' -Level Warning
+        Write-Host ''
+        Write-Host '    -  Rollback cancelled by user.' -ForegroundColor Yellow
+        Write-Host ''
         exit 0
     }
+    Write-Host ''
 }
 
-Write-CISLog -Message '=== CIS Benchmark - Rollback ===' -Level Info
-
 # ── Pre-flight ──
+Write-Host '  [3/4] Pre-flight connectivity check...' -ForegroundColor Cyan
 $preFlight = Test-AWSConnectivity
 if (-not $preFlight.Pass) {
-    Write-CISLog -Message 'WARNING: Connectivity issues detected before rollback. Proceeding anyway.' -Level Warning
+    Write-Host '    !  Connectivity issues detected. Proceeding anyway.' -ForegroundColor Yellow
+} else {
+    Write-Host '    +  Connectivity OK' -ForegroundColor Green
 }
 
 # ── Restore ──
+Write-Host ''
+Write-Host '  [4/4] Restoring...' -ForegroundColor Cyan
+
 $restoreParams = @{
     BackupPath = $BackupPath
 }
@@ -94,14 +113,22 @@ if ($RemoveGPOs) { $restoreParams.RemoveGPOs = $true }
 
 Restore-CISState @restoreParams
 
+Write-Host '    +  Restore complete' -ForegroundColor Green
+
 # ── Post-flight ──
-Write-CISLog -Message 'Running post-rollback connectivity check...' -Level Info
+Write-Host ''
+Write-Host '  Post-rollback connectivity check...' -ForegroundColor Cyan
 $postFlight = Test-AWSConnectivity
 
+Write-Host ''
+Write-Host '  ============================' -ForegroundColor DarkGray
+Write-Host '  Rollback Complete' -ForegroundColor White
+Write-Host '  ----------------------------' -ForegroundColor DarkGray
 if ($postFlight.Pass) {
-    Write-CISLog -Message 'Post-rollback connectivity: ALL PASSED' -Level Info
+    Write-Host '    +  Connectivity: ALL PASSED' -ForegroundColor Green
 } else {
-    Write-CISLog -Message 'Post-rollback connectivity: ISSUES DETECTED - check results above' -Level Warning
+    Write-Host '    !  Connectivity: ISSUES DETECTED' -ForegroundColor Yellow
+    Write-Host '       Review the results above.' -ForegroundColor DarkGray
 }
-
-Write-CISLog -Message '=== CIS Benchmark Rollback - Complete ===' -Level Info
+Write-Host '  ============================' -ForegroundColor DarkGray
+Write-Host ''
