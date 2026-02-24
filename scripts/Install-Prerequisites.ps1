@@ -12,7 +12,7 @@ param()
 
 $ErrorActionPreference = 'Stop'
 
-Write-Host '═══ CIS Benchmark — Installing Prerequisites ═══' -ForegroundColor Cyan
+Write-Host '=== CIS Benchmark - Installing Prerequisites ===' -ForegroundColor Cyan
 
 # ── Windows Features (RSAT) ──
 $features = @(
@@ -54,7 +54,7 @@ foreach ($mod in $critical) {
         Import-Module $mod -ErrorAction Stop
         Write-Host "[OK] Import-Module $mod succeeded" -ForegroundColor Green
     } catch {
-        Write-Host "[WARN] Could not import $mod — $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "[WARN] Could not import $mod - $($_.Exception.Message)" -ForegroundColor Yellow
     }
 }
 
@@ -63,7 +63,7 @@ $auditpol = Get-Command auditpol.exe -ErrorAction SilentlyContinue
 if ($auditpol) {
     Write-Host '[OK] auditpol.exe is available' -ForegroundColor Green
 } else {
-    Write-Host '[WARN] auditpol.exe not found — AuditPolicy module will not work' -ForegroundColor Yellow
+    Write-Host '[WARN] auditpol.exe not found - AuditPolicy module will not work' -ForegroundColor Yellow
 }
 
 # ── Verify secedit is available ──
@@ -71,9 +71,9 @@ $secedit = Get-Command secedit.exe -ErrorAction SilentlyContinue
 if ($secedit) {
     Write-Host '[OK] secedit.exe is available' -ForegroundColor Green
 } else {
-    Write-Host '[WARN] secedit.exe not found — SecurityOptions/UserRights modules may not work' -ForegroundColor Yellow
+    Write-Host '[WARN] secedit.exe not found - SecurityOptions/UserRights modules may not work' -ForegroundColor Yellow
 }
 
 Write-Host ''
-Write-Host '═══ Prerequisites installation complete ═══' -ForegroundColor Cyan
+Write-Host '=== Prerequisites installation complete ===' -ForegroundColor Cyan
 Write-Host 'Next: Run Invoke-CISAudit.ps1 to audit your current configuration.' -ForegroundColor White

@@ -20,7 +20,7 @@ function Export-CISReport {
 
         [string[]]$Formats = @('HTML','JSON'),
 
-        [string]$ReportTitle = 'CIS Benchmark L1 — Compliance Report'
+        [string]$ReportTitle = 'CIS Benchmark L1 - Compliance Report'
     )
 
     if (-not $OutputDir) {

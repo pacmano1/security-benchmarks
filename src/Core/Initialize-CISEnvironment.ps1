@@ -23,7 +23,7 @@ function Initialize-CISEnvironment {
     if (-not (Test-Path $logDir)) { New-Item -Path $logDir -ItemType Directory -Force | Out-Null }
     $script:LogFile = Join-Path $logDir ("CIS-{0}.log" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
 
-    Write-CISLog -Message '═══ CIS Benchmark Automation — Initializing ═══' -Level Info
+    Write-CISLog -Message '=== CIS Benchmark Automation - Initializing ===' -Level Info
 
     # ── OS check ──
     if (-not $SkipPrereqCheck) {
@@ -46,7 +46,7 @@ function Initialize-CISEnvironment {
                 Import-Module $mod -ErrorAction SilentlyContinue
                 Write-CISLog -Message "Module available: $mod" -Level Debug
             } else {
-                Write-CISLog -Message "Required module not installed: $mod — run Install-Prerequisites.ps1" -Level Warning
+                Write-CISLog -Message "Required module not installed: $mod - run Install-Prerequisites.ps1" -Level Warning
             }
         }
     }
@@ -66,7 +66,7 @@ function Initialize-CISEnvironment {
 
     $enabledModules = ($config.Modules.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key }) -join ', '
     Write-CISLog -Message "Enabled modules: $enabledModules" -Level Info
-    Write-CISLog -Message '═══ Initialization complete ═══' -Level Info
+    Write-CISLog -Message '=== Initialization complete ===' -Level Info
 
     return $config
 }

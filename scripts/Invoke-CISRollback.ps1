@@ -56,18 +56,18 @@ if (-not $BackupPath) {
 # ── Confirmation ──
 if (-not $Force) {
     Write-Host ''
-    Write-Host '╔════════════════════════════════════════════════════════╗' -ForegroundColor Yellow
-    Write-Host '║  ROLLBACK: This will revert CIS Benchmark changes!   ║' -ForegroundColor Yellow
-    Write-Host "║  Backup: $($BackupPath | Split-Path -Leaf)".PadRight(55) + '║' -ForegroundColor Yellow
+    Write-Host '+========================================================+' -ForegroundColor Yellow
+    Write-Host '|  ROLLBACK: This will revert CIS Benchmark changes!   |' -ForegroundColor Yellow
+    Write-Host "|  Backup: $($BackupPath | Split-Path -Leaf)".PadRight(55) + '|' -ForegroundColor Yellow
     if ($Module) {
-        Write-Host "║  Module: $Module".PadRight(55) + '║' -ForegroundColor Yellow
+        Write-Host "|  Module: $Module".PadRight(55) + '|' -ForegroundColor Yellow
     }
     if ($RemoveGPOs) {
-        Write-Host '║  Mode: REMOVE GPOs entirely                          ║' -ForegroundColor Red
+        Write-Host '|  Mode: REMOVE GPOs entirely                          |' -ForegroundColor Red
     } else {
-        Write-Host '║  Mode: Restore GPOs to pre-apply state               ║' -ForegroundColor Yellow
+        Write-Host '|  Mode: Restore GPOs to pre-apply state               |' -ForegroundColor Yellow
     }
-    Write-Host '╚════════════════════════════════════════════════════════╝' -ForegroundColor Yellow
+    Write-Host '+========================================================+' -ForegroundColor Yellow
     Write-Host ''
 
     $confirm = Read-Host 'Type YES to proceed with rollback'
@@ -77,7 +77,7 @@ if (-not $Force) {
     }
 }
 
-Write-CISLog -Message '═══ CIS Benchmark — Rollback ═══' -Level Info
+Write-CISLog -Message '=== CIS Benchmark - Rollback ===' -Level Info
 
 # ── Pre-flight ──
 $preFlight = Test-AWSConnectivity
@@ -101,7 +101,7 @@ $postFlight = Test-AWSConnectivity
 if ($postFlight.Pass) {
     Write-CISLog -Message 'Post-rollback connectivity: ALL PASSED' -Level Info
 } else {
-    Write-CISLog -Message 'Post-rollback connectivity: ISSUES DETECTED — check results above' -Level Warning
+    Write-CISLog -Message 'Post-rollback connectivity: ISSUES DETECTED - check results above' -Level Warning
 }
 
-Write-CISLog -Message '═══ CIS Benchmark Rollback — Complete ═══' -Level Info
+Write-CISLog -Message '=== CIS Benchmark Rollback - Complete ===' -Level Info

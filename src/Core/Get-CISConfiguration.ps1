@@ -32,7 +32,7 @@ function Get-CISConfiguration {
         Write-CISLog -Message "Loaded AWS exclusions ($($config.AWSExclusions.Skip.Count) skipped, $($config.AWSExclusions.Modify.Count) modified)" -Level Info
     } else {
         $config.AWSExclusions = @{ Skip = @(); Modify = @{} }
-        Write-CISLog -Message 'No AWS exclusions file found — proceeding without exclusions' -Level Warning
+        Write-CISLog -Message 'No AWS exclusions file found - proceeding without exclusions' -Level Warning
     }
 
     # ── Module configs ──
@@ -41,7 +41,7 @@ function Get-CISConfiguration {
 
     foreach ($modName in $config.Modules.Keys) {
         if (-not $config.Modules[$modName]) {
-            Write-CISLog -Message "Module '$modName' is disabled — skipping config load" -Level Debug
+            Write-CISLog -Message "Module '$modName' is disabled - skipping config load" -Level Debug
             continue
         }
 
@@ -51,7 +51,7 @@ function Get-CISConfiguration {
             $controlCount = $config.ModuleConfigs[$modName].Controls.Count
             Write-CISLog -Message "Loaded module config: $modName ($controlCount controls)" -Level Info
         } else {
-            Write-CISLog -Message "Module config not found: $modFile — module will be skipped" -Level Warning
+            Write-CISLog -Message "Module config not found: $modFile - module will be skipped" -Level Warning
         }
     }
 

@@ -37,7 +37,7 @@ function Restore-CISState {
     }
     $meta = Get-Content $metaPath -Raw | ConvertFrom-Json
 
-    Write-CISLog -Message "── Restoring from backup: $($meta.Timestamp) ──" -Level Info
+    Write-CISLog -Message "-- Restoring from backup: $($meta.Timestamp) --" -Level Info
     Write-CISLog -Message "Backup computer: $($meta.ComputerName)" -Level Info
 
     $prefix = $meta.GpoPrefix
@@ -87,7 +87,7 @@ function Restore-CISState {
                         Import-GPO -BackupId $backupGpo.Name -Path $gpoDir -TargetName $gpoName -ErrorAction Stop
                         Write-CISLog -Message "Restored GPO from backup: $gpoName" -Level Info
                     } else {
-                        Write-CISLog -Message "No backup found for GPO: $gpoName — skipping restore" -Level Warning
+                        Write-CISLog -Message "No backup found for GPO: $gpoName - skipping restore" -Level Warning
                     }
                 } catch {
                     Write-CISLog -Message "Failed to restore GPO $gpoName`: $_" -Level Error
@@ -107,5 +107,5 @@ function Restore-CISState {
         Write-CISLog -Message "gpupdate failed: $_" -Level Warning
     }
 
-    Write-CISLog -Message "── Restore complete ──" -Level Info
+    Write-CISLog -Message "-- Restore complete --" -Level Info
 }

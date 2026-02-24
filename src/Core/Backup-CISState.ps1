@@ -32,7 +32,7 @@ function Backup-CISState {
     $backupPath = Join-Path $BackupDir "CIS-Backup-$timestamp"
     New-Item -Path $backupPath -ItemType Directory -Force | Out-Null
 
-    Write-CISLog -Message "── Creating state backup: $backupPath ──" -Level Info
+    Write-CISLog -Message "-- Creating state backup: $backupPath --" -Level Info
 
     # ── GPO Backups ──
     $gpoDir = Join-Path $backupPath 'GPOs'
@@ -94,6 +94,6 @@ function Backup-CISState {
     }
     $meta | ConvertTo-Json -Depth 3 | Out-File (Join-Path $backupPath 'backup-metadata.json') -Encoding utf8
 
-    Write-CISLog -Message "── Backup complete: $backupPath ──" -Level Info
+    Write-CISLog -Message "-- Backup complete: $backupPath --" -Level Info
     return $backupPath
 }

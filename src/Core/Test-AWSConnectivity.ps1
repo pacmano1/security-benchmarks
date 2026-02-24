@@ -15,7 +15,7 @@ function Test-AWSConnectivity {
         [bool]$CheckRDP = $true
     )
 
-    Write-CISLog -Message '── Connectivity pre/post-flight check ──' -Level Info
+    Write-CISLog -Message '-- Connectivity pre/post-flight check --' -Level Info
 
     $results = [ordered]@{}
     $allPassed = $true
@@ -66,7 +66,7 @@ function Test-AWSConnectivity {
         }
     } catch {
         $results['SSMAgent'] = 'Warning'
-        Write-CISLog -Message 'SSM Agent not found — may not be an EC2 instance' -Level Warning
+        Write-CISLog -Message 'SSM Agent not found - may not be an EC2 instance' -Level Warning
     }
 
     # ── RDP ──
@@ -115,9 +115,9 @@ function Test-AWSConnectivity {
     }
 
     if ($allPassed) {
-        Write-CISLog -Message '── Connectivity check: ALL PASSED ──' -Level Info
+        Write-CISLog -Message '-- Connectivity check: ALL PASSED --' -Level Info
     } else {
-        Write-CISLog -Message '── Connectivity check: FAILURES DETECTED ──' -Level Error
+        Write-CISLog -Message '-- Connectivity check: FAILURES DETECTED --' -Level Error
     }
 
     return $output

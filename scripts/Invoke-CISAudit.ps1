@@ -34,7 +34,7 @@ $config = Initialize-CISEnvironment -ProjectRoot $ProjectRoot -SkipPrereqCheck:$
 if ($config.HaltOnConnectivityFailure -and -not $SkipPrereqCheck) {
     $connectivity = Test-AWSConnectivity
     if (-not $connectivity.Pass) {
-        Write-CISLog -Message 'Pre-flight connectivity check FAILED — aborting audit.' -Level Error
+        Write-CISLog -Message 'Pre-flight connectivity check FAILED - aborting audit.' -Level Error
         exit 1
     }
 }
@@ -55,11 +55,11 @@ foreach ($modName in $modulesToAudit) {
     $testFunc = "Test-CIS$modName"
 
     if (-not (Get-Command $testFunc -ErrorAction SilentlyContinue)) {
-        Write-CISLog -Message "Audit function not found: $testFunc — skipping" -Level Warning
+        Write-CISLog -Message "Audit function not found: $testFunc - skipping" -Level Warning
         continue
     }
 
-    Write-CISLog -Message "── Auditing: $modName ──" -Level Info
+    Write-CISLog -Message "-- Auditing: $modName --" -Level Info
 
     try {
         $moduleResults = & $testFunc
@@ -86,11 +86,11 @@ foreach ($modName in $modulesToAudit) {
 # ── Generate report ──
 if ($allResults.Count -gt 0) {
     $summary = Export-CISReport -Results $allResults -Formats $config.ReportFormats
-    Write-CISLog -Message '═══════════════════════════════════════════' -Level Info
-    Write-CISLog -Message "AUDIT COMPLETE — $($summary.Total) controls evaluated" -Level Info
+    Write-CISLog -Message '===========================================' -Level Info
+    Write-CISLog -Message "AUDIT COMPLETE - $($summary.Total) controls evaluated" -Level Info
     Write-CISLog -Message "Passed: $($summary.Passed) | Failed: $($summary.Failed) | Skipped: $($summary.Skipped) | Errors: $($summary.Errors)" -Level Info
     Write-CISLog -Message "Compliance: $($summary.PassPercent)%" -Level Info
-    Write-CISLog -Message '═══════════════════════════════════════════' -Level Info
+    Write-CISLog -Message '===========================================' -Level Info
 } else {
-    Write-CISLog -Message 'No audit results — check that modules are enabled and config files exist.' -Level Warning
+    Write-CISLog -Message 'No audit results - check that modules are enabled and config files exist.' -Level Warning
 }

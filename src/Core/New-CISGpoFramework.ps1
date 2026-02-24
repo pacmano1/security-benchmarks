@@ -20,7 +20,7 @@ function New-CISGpoFramework {
     $prefix   = $config.GpoPrefix
     $targetOU = $config.TargetOU
 
-    Write-CISLog -Message '── Creating GPO Framework ──' -Level Info
+    Write-CISLog -Message '-- Creating GPO Framework --' -Level Info
 
     $gpoMap = @{}
 
@@ -58,10 +58,10 @@ function New-CISGpoFramework {
             $alreadyLinked = $links | Where-Object { $_.DisplayName -eq $gpoName }
 
             if ($alreadyLinked) {
-                Write-CISLog -Message "GPO already linked: $gpoName → $targetOU" -Level Info
+                Write-CISLog -Message "GPO already linked: $gpoName -> $targetOU" -Level Info
             } else {
                 New-GPLink -Name $gpoName -Target $targetOU -LinkEnabled Yes -ErrorAction Stop
-                Write-CISLog -Message "Linked GPO: $gpoName → $targetOU" -Level Info
+                Write-CISLog -Message "Linked GPO: $gpoName -> $targetOU" -Level Info
             }
         } catch {
             Write-CISLog -Message "Failed to link GPO $gpoName to $targetOU`: $_" -Level Error

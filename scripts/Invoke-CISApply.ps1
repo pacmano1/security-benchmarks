@@ -45,15 +45,15 @@ $config = Initialize-CISEnvironment -ProjectRoot $ProjectRoot -SkipPrereqCheck:$
 # Override DryRun if explicitly passed
 $isDryRun = if ($null -ne $DryRun) { $DryRun } else { $config.DryRun }
 
-Write-CISLog -Message "═══ CIS Benchmark — Apply Mode (DryRun: $isDryRun) ═══" -Level Info
+Write-CISLog -Message "=== CIS Benchmark - Apply Mode (DryRun: $isDryRun) ===" -Level Info
 
 # ── Safety confirmation ──
 if (-not $isDryRun -and -not $Force) {
     Write-Host ''
-    Write-Host '╔════════════════════════════════════════════════════════╗' -ForegroundColor Yellow
-    Write-Host '║  WARNING: This will CREATE GPOs and APPLY settings!   ║' -ForegroundColor Yellow
-    Write-Host '║  Target OU:' "$($config.TargetOU)".PadRight(42) '║' -ForegroundColor Yellow
-    Write-Host '╚════════════════════════════════════════════════════════╝' -ForegroundColor Yellow
+    Write-Host '+========================================================+' -ForegroundColor Yellow
+    Write-Host '|  WARNING: This will CREATE GPOs and APPLY settings!   |' -ForegroundColor Yellow
+    Write-Host '|  Target OU:' "$($config.TargetOU)".PadRight(42) '|' -ForegroundColor Yellow
+    Write-Host '+========================================================+' -ForegroundColor Yellow
     Write-Host ''
 
     $confirm = Read-Host 'Type YES to proceed'
@@ -67,7 +67,7 @@ if (-not $isDryRun -and -not $Force) {
 if ($config.HaltOnConnectivityFailure -and -not $SkipPrereqCheck) {
     $preFlight = Test-AWSConnectivity
     if (-not $preFlight.Pass) {
-        Write-CISLog -Message 'Pre-flight connectivity check FAILED — aborting apply.' -Level Error
+        Write-CISLog -Message 'Pre-flight connectivity check FAILED - aborting apply.' -Level Error
         exit 1
     }
 }
@@ -106,17 +106,17 @@ foreach ($modName in $applyOrder) {
 
     $setFunc = "Set-CIS$modName"
     if (-not (Get-Command $setFunc -ErrorAction SilentlyContinue)) {
-        Write-CISLog -Message "Apply function not found: $setFunc — skipping" -Level Warning
+        Write-CISLog -Message "Apply function not found: $setFunc - skipping" -Level Warning
         continue
     }
 
     $gpoName = $gpoMap[$modName]
     if (-not $gpoName) {
-        Write-CISLog -Message "No GPO mapped for module: $modName — skipping" -Level Warning
+        Write-CISLog -Message "No GPO mapped for module: $modName - skipping" -Level Warning
         continue
     }
 
-    Write-CISLog -Message "── Applying: $modName → $gpoName ──" -Level Info
+    Write-CISLog -Message "-- Applying: $modName -> $gpoName --" -Level Info
 
     try {
         & $setFunc -GpoName $gpoName -DryRun $isDryRun
@@ -131,18 +131,18 @@ if ($config.PostFlightCheck -and -not $isDryRun -and -not $SkipPrereqCheck) {
     $postFlight = Test-AWSConnectivity
 
     if (-not $postFlight.Pass) {
-        Write-CISLog -Message '╔══════════════════════════════════════════════════════╗' -Level Error
-        Write-CISLog -Message '║  POST-FLIGHT CONNECTIVITY CHECK FAILED!             ║' -Level Error
-        Write-CISLog -Message '║  Management access may be impaired.                 ║' -Level Error
-        Write-CISLog -Message "║  Backup location: $backupPath" -Level Error
-        Write-CISLog -Message '║  Run Invoke-CISRollback.ps1 to revert changes.      ║' -Level Error
-        Write-CISLog -Message '╚══════════════════════════════════════════════════════╝' -Level Error
+        Write-CISLog -Message '+======================================================+' -Level Error
+        Write-CISLog -Message '|  POST-FLIGHT CONNECTIVITY CHECK FAILED!             |' -Level Error
+        Write-CISLog -Message '|  Management access may be impaired.                 |' -Level Error
+        Write-CISLog -Message "|  Backup location: $backupPath" -Level Error
+        Write-CISLog -Message '|  Run Invoke-CISRollback.ps1 to revert changes.      |' -Level Error
+        Write-CISLog -Message '+======================================================+' -Level Error
         exit 1
     }
 }
 
 # ── Run audit to show compliance delta ──
-Write-CISLog -Message '═══ Apply complete — running compliance audit ═══' -Level Info
+Write-CISLog -Message '=== Apply complete - running compliance audit ===' -Level Info
 
 $allResults = @()
 foreach ($modName in $modulesToApply) {
@@ -162,4 +162,4 @@ if ($allResults.Count -gt 0) {
     Write-CISLog -Message "Post-apply compliance: $($summary.PassPercent)% ($($summary.Passed)/$($summary.Total - $summary.Skipped))" -Level Info
 }
 
-Write-CISLog -Message '═══ CIS Benchmark Apply — Complete ═══' -Level Info
+Write-CISLog -Message '=== CIS Benchmark Apply - Complete ===' -Level Info
