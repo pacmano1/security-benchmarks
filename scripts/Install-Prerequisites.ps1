@@ -32,7 +32,7 @@ Write-Host ''
 
 $isWindows = ($PSVersionTable.PSVersion.Major -ge 6 -and $IsWindows) -or ($PSVersionTable.PSVersion.Major -le 5)
 if (-not $isWindows) {
-    Write-Status 'i' 'Non-Windows OS detected. Only Pester will be installed.' Yellow
+    Write-Status 'i' 'Non-Windows OS detected. No prerequisites to install.' Yellow
 }
 
 $isServer = $false
@@ -119,28 +119,6 @@ if ($isServer) {
     Write-Host ''
 }
 
-# ── PowerShell modules ──
-Write-Host '  PowerShell Modules' -ForegroundColor White
-Write-Host '  ------------------' -ForegroundColor DarkGray
-
-if (-not (Get-PackageProvider -Name NuGet -ErrorAction SilentlyContinue)) {
-    Write-Status '~' 'Installing NuGet package provider ...' Yellow
-    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-    Write-Status '+' 'NuGet package provider' Green
-} else {
-    Write-Status '+' 'NuGet package provider' Green
-}
-
-if (-not (Get-Module -ListAvailable -Name Pester | Where-Object { $_.Version -ge '5.0' })) {
-    Write-Status '~' 'Installing Pester 5.x ...' Yellow
-    Install-Module -Name Pester -MinimumVersion 5.0.0 -Force -SkipPublisherCheck
-    Write-Status '+' 'Pester 5.x' Green
-} else {
-    Write-Status '+' 'Pester 5.x' Green
-}
-
-Write-Host ''
-
 # ── Verify critical modules import (AD/GPO - only if relevant) ──
 if ($isWindows) {
     Write-Host '  Module Verification' -ForegroundColor White
@@ -187,7 +165,7 @@ if ($isDomainJoined) {
 } elseif ($isWindows) {
     Write-Status '!' 'Ready: Workstation - audit OK, GPO apply requires domain server' Yellow
 } else {
-    Write-Status '!' 'Ready: Non-Windows - only Pester tests available' Yellow
+    Write-Status '!' 'Non-Windows - this tool requires Windows' Yellow
 }
 Write-Host ''
 Write-Host '  Next: .\Invoke-CISAudit.ps1' -ForegroundColor White
