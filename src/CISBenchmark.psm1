@@ -15,6 +15,7 @@ $coreScripts = @(
     'Core\New-CISGpoFramework.ps1'
     'Core\Backup-CISState.ps1'
     'Core\Restore-CISState.ps1'
+    'Core\Disable-UnnecessaryFirewallRules.ps1'
 )
 
 foreach ($script in $coreScripts) {

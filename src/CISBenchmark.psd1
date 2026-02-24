@@ -15,6 +15,7 @@
         'New-CISGpoFramework'
         'Backup-CISState'
         'Restore-CISState'
+        'Disable-UnnecessaryFirewallRules'
         # Module: SecurityOptions
         'Test-CISSecurityOptions'
         'Set-CISSecurityOptions'

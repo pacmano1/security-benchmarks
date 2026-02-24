@@ -24,6 +24,9 @@
 .PARAMETER LocalPolicy
     Force local policy mode (write directly to registry/secedit/auditpol
     instead of GPOs). Auto-detected when not domain-joined.
+.PARAMETER HardenFirewallRules
+    Disable unnecessary Windows Firewall allow rules (casting, wireless
+    display, mDNS, etc.) that are inappropriate for hardened servers.
 #>
 [CmdletBinding()]
 param(
@@ -37,7 +40,9 @@ param(
 
     [switch]$Force,
 
-    [switch]$LocalPolicy
+    [switch]$LocalPolicy,
+
+    [switch]$HardenFirewallRules
 )
 
 $ErrorActionPreference = 'Stop'
@@ -308,6 +313,24 @@ if (-not $isDryRun) {
     }
 } else {
     Write-Host '  [6/7] Policy refresh skipped (dry run)' -ForegroundColor DarkGray
+}
+
+# -- Optional: harden firewall rules --
+if ($HardenFirewallRules) {
+    Write-Host ''
+    Write-Host '  Hardening firewall rules (disabling unnecessary services)...' -ForegroundColor Cyan
+    $fwResults = Disable-UnnecessaryFirewallRules -DryRun $isDryRun
+    if ($fwResults.Count -gt 0) {
+        foreach ($fwr in $fwResults) {
+            if ($isDryRun) {
+                Write-Host "    ~  $($fwr.Group) ($($fwr.Count) rules)" -ForegroundColor Yellow
+            } else {
+                Write-Host "    +  $($fwr.Group) ($($fwr.Count) rules disabled)" -ForegroundColor Green
+            }
+        }
+    } else {
+        Write-Host '    +  No unnecessary rules found enabled' -ForegroundColor Green
+    }
 }
 
 # -- Post-flight connectivity --
