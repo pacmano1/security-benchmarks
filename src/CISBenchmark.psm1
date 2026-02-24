@@ -1,11 +1,11 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# CISBenchmark.psm1 — Root module
+# -----------------------------------------------------------------------------
+# CISBenchmark.psm1 - Root module
 # Dot-sources all Core and Module scripts.
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 
 $ModuleRoot = $PSScriptRoot
 
-# ── Core functions (order matters: Write-CISLog first, then config, then rest) ──
+# -- Core functions (order matters: Write-CISLog first, then config, then rest) --
 $coreScripts = @(
     'Core\Write-CISLog.ps1'
     'Core\Get-CISConfiguration.ps1'
@@ -22,11 +22,11 @@ foreach ($script in $coreScripts) {
     if (Test-Path $path) {
         . $path
     } else {
-        Write-Warning "CISBenchmark: Core script not found — $script"
+        Write-Warning "CISBenchmark: Core script not found - $script"
     }
 }
 
-# ── CIS Modules (each folder has Test-*.ps1 and Set-*.ps1) ──
+# -- CIS Modules (each folder has Test-*.ps1 and Set-*.ps1) --
 $moduleNames = @(
     'AccountPolicies'
     'UserRightsAssignment'
@@ -39,7 +39,7 @@ $moduleNames = @(
 )
 
 foreach ($modName in $moduleNames) {
-    $modDir = Join-Path $ModuleRoot 'Modules' $modName
+    $modDir = Join-Path (Join-Path $ModuleRoot 'Modules') $modName
     if (Test-Path $modDir) {
         Get-ChildItem -Path $modDir -Filter '*.ps1' -File | ForEach-Object {
             . $_.FullName

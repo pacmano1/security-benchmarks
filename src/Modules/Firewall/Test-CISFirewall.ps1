@@ -1,7 +1,7 @@
 function Test-CISFirewall {
     <#
     .SYNOPSIS
-        Audits CIS Section 9 — Windows Defender Firewall controls.
+        Audits CIS Section 9 - Windows Defender Firewall controls.
     #>
     [CmdletBinding()]
     param()

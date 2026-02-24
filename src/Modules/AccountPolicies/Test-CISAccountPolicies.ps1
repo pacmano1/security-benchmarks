@@ -1,7 +1,7 @@
 function Test-CISAccountPolicies {
     <#
     .SYNOPSIS
-        Audits CIS Section 1 — Account Policies.
+        Audits CIS Section 1 - Account Policies.
     .DESCRIPTION
         Uses secedit /export to read domain password and lockout policies.
         NOTE: In AWS Managed AD, these are controlled by AWS and cannot be

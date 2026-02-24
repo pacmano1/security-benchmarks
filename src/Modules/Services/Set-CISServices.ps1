@@ -1,7 +1,7 @@
 function Set-CISServices {
     <#
     .SYNOPSIS
-        Applies CIS Section 5 — System Services via GPO registry.
+        Applies CIS Section 5 - System Services via GPO registry.
     .DESCRIPTION
         Sets service startup type via the registry key for the service
         under HKLM\SYSTEM\CurrentControlSet\Services\<name>\Start.

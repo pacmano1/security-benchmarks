@@ -1,7 +1,7 @@
 function Set-CISAdminTemplatesUser {
     <#
     .SYNOPSIS
-        Applies CIS Section 19 — Administrative Templates (User) via GPO.
+        Applies CIS Section 19 - Administrative Templates (User) via GPO.
     .DESCRIPTION
         Uses Set-GPRegistryValue targeting the User Configuration portion
         of the GPO (HKCU paths).

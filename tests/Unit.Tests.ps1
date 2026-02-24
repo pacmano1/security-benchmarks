@@ -814,7 +814,7 @@ Describe 'Get-CISConfiguration' {
             $config = Get-CISConfiguration -ProjectRoot $ProjectRoot
             $config.ModuleConfigs.Keys.Count | Should -BeGreaterThan 0
 
-            # SecurityOptions is enabled by default — verify it loaded
+            # SecurityOptions is enabled by default - verify it loaded
             $config.ModuleConfigs['SecurityOptions'] | Should -Not -BeNullOrEmpty
             $config.ModuleConfigs['SecurityOptions'].Controls.Count | Should -BeGreaterThan 0
         }
@@ -874,7 +874,7 @@ Describe 'Get-CISConfiguration' {
 }
 "@ | Set-Content (Join-Path $configDir 'master-config.psd1')
 
-            # Should not throw — just warn and use empty exclusions
+            # Should not throw - just warn and use empty exclusions
             $config = Get-CISConfiguration -ProjectRoot $tempRoot
             $config.AWSExclusions | Should -Not -BeNullOrEmpty
             $config.AWSExclusions.Skip.Count | Should -Be 0
@@ -1136,7 +1136,7 @@ Describe 'Test-CISUserRightsAssignment' {
                 @{
                     'SeNetworkLogonRight' = '*S-1-5-32-544,*S-1-5-32-545'
                     'SeBackupPrivilege'   = '*S-1-5-32-544'
-                    # SeTrustedCredManAccessPrivilege is absent — $null
+                    # SeTrustedCredManAccessPrivilege is absent - $null
                 }
             }
 
@@ -1330,7 +1330,7 @@ Describe 'Set-CIS* DryRun behavior' {
 }
 
 # =============================================================================
-# Export-CISReport — extended edge cases
+# Export-CISReport - extended edge cases
 # =============================================================================
 Describe 'Export-CISReport edge cases' {
     BeforeAll {
@@ -1413,7 +1413,7 @@ Describe 'Export-CISReport edge cases' {
 }
 
 # =============================================================================
-# Write-CISLog — extended edge cases
+# Write-CISLog - extended edge cases
 # =============================================================================
 Describe 'Write-CISLog log level filtering' {
     It 'should suppress Debug messages when LogLevel is Warning' {
@@ -1434,7 +1434,7 @@ Describe 'Write-CISLog log level filtering' {
                 $content | Should -Match 'Warning msg'
                 $content | Should -Match 'Error msg'
             } else {
-                # If nothing was logged at all, that's wrong — Warning and Error should have logged
+                # If nothing was logged at all, that's wrong - Warning and Error should have logged
                 $false | Should -Be $true -Because 'Warning and Error messages should be logged'
             }
 

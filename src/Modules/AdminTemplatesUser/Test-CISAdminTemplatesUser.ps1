@@ -1,7 +1,7 @@
 function Test-CISAdminTemplatesUser {
     <#
     .SYNOPSIS
-        Audits CIS Section 19 — Administrative Templates (User Configuration).
+        Audits CIS Section 19 - Administrative Templates (User Configuration).
     .DESCRIPTION
         Reads HKCU registry values. Note: these values reflect the currently
         logged-on user's applied policy. For accurate GPO-level auditing, run

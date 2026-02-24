@@ -36,15 +36,15 @@ Write-Host '  CIS Benchmark L1 - Rollback' -ForegroundColor White
 Write-Host '  ============================' -ForegroundColor DarkGray
 Write-Host ''
 
-# ── Import module ──
+# -- Import module --
 $modulePath = Join-Path (Join-Path $ProjectRoot 'src') 'CISBenchmark.psm1'
 Import-Module $modulePath -Force
 
-# ── Initialize (minimal - just logging + config) ──
+# -- Initialize (minimal - just logging + config) --
 Write-Host '  [1/4] Initializing...' -ForegroundColor Cyan
 $config = Initialize-CISEnvironment -ProjectRoot $ProjectRoot -SkipPrereqCheck
 
-# ── Find backup ──
+# -- Find backup --
 Write-Host '  [2/4] Locating backup...' -ForegroundColor Cyan
 
 if (-not $BackupPath) {
@@ -65,7 +65,7 @@ if (-not $BackupPath) {
     Write-Host "    +  Using: $(Split-Path $BackupPath -Leaf)" -ForegroundColor Green
 }
 
-# ── Confirmation ──
+# -- Confirmation --
 if (-not $Force) {
     Write-Host ''
     Write-Host '  +----------------------------------------------------------+' -ForegroundColor Yellow
@@ -92,7 +92,7 @@ if (-not $Force) {
     Write-Host ''
 }
 
-# ── Pre-flight ──
+# -- Pre-flight --
 Write-Host '  [3/4] Pre-flight connectivity check...' -ForegroundColor Cyan
 $preFlight = Test-AWSConnectivity
 if (-not $preFlight.Pass) {
@@ -101,7 +101,7 @@ if (-not $preFlight.Pass) {
     Write-Host '    +  Connectivity OK' -ForegroundColor Green
 }
 
-# ── Restore ──
+# -- Restore --
 Write-Host ''
 Write-Host '  [4/4] Restoring...' -ForegroundColor Cyan
 
@@ -115,7 +115,7 @@ Restore-CISState @restoreParams
 
 Write-Host '    +  Restore complete' -ForegroundColor Green
 
-# ── Post-flight ──
+# -- Post-flight --
 Write-Host ''
 Write-Host '  Post-rollback connectivity check...' -ForegroundColor Cyan
 $postFlight = Test-AWSConnectivity

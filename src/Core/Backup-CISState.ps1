@@ -34,7 +34,7 @@ function Backup-CISState {
 
     Write-CISLog -Message "-- Creating state backup: $backupPath --" -Level Info
 
-    # ── GPO Backups ──
+    # -- GPO Backups --
     $gpoDir = Join-Path $backupPath 'GPOs'
     New-Item -Path $gpoDir -ItemType Directory -Force | Out-Null
 
@@ -56,7 +56,7 @@ function Backup-CISState {
         }
     }
 
-    # ── Secedit export ──
+    # -- Secedit export --
     $seceditPath = Join-Path $backupPath 'secedit-baseline.inf'
     try {
         $null = secedit.exe /export /cfg $seceditPath /quiet 2>&1
@@ -65,7 +65,7 @@ function Backup-CISState {
         Write-CISLog -Message "Failed secedit export: $_" -Level Warning
     }
 
-    # ── Auditpol export ──
+    # -- Auditpol export --
     $auditPath = Join-Path $backupPath 'auditpol-baseline.csv'
     try {
         auditpol.exe /backup /file:$auditPath 2>&1 | Out-Null
@@ -74,7 +74,7 @@ function Backup-CISState {
         Write-CISLog -Message "Failed auditpol export: $_" -Level Warning
     }
 
-    # ── Service states ──
+    # -- Service states --
     $svcPath = Join-Path $backupPath 'services-baseline.json'
     try {
         $services = Get-CimInstance -ClassName Win32_Service | Select-Object Name, StartMode, State
@@ -84,7 +84,7 @@ function Backup-CISState {
         Write-CISLog -Message "Failed service state export: $_" -Level Warning
     }
 
-    # ── Metadata ──
+    # -- Metadata --
     $meta = @{
         Timestamp  = $timestamp
         Modules    = $modulesToBackup

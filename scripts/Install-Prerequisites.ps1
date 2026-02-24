@@ -19,14 +19,14 @@ Write-Host '  CIS Benchmark - Install Prerequisites' -ForegroundColor White
 Write-Host '  ======================================' -ForegroundColor DarkGray
 Write-Host ''
 
-# ── Status helper ──
+# -- Status helper --
 function Write-Status {
     param([string]$Symbol, [string]$Message, [ConsoleColor]$Color = 'White')
     Write-Host "  $Symbol " -ForegroundColor $Color -NoNewline
     Write-Host $Message
 }
 
-# ── Detect environment ──
+# -- Detect environment --
 Write-Host '  Detecting environment...' -ForegroundColor DarkGray
 Write-Host ''
 
@@ -58,7 +58,7 @@ if ($isWindows) {
 
 Write-Host ''
 
-# ── Windows Features (RSAT) - Server only ──
+# -- Windows Features (RSAT) - Server only --
 if ($isServer) {
     Write-Host '  RSAT Features' -ForegroundColor White
     Write-Host '  -------------' -ForegroundColor DarkGray
@@ -119,7 +119,7 @@ if ($isServer) {
     Write-Host ''
 }
 
-# ── Verify critical modules import (AD/GPO - only if relevant) ──
+# -- Verify critical modules import (AD/GPO - only if relevant) --
 if ($isWindows) {
     Write-Host '  Module Verification' -ForegroundColor White
     Write-Host '  -------------------' -ForegroundColor DarkGray
@@ -138,7 +138,7 @@ if ($isWindows) {
         }
     }
 
-    # ── Verify system tools ──
+    # -- Verify system tools --
     $auditpol = Get-Command auditpol.exe -ErrorAction SilentlyContinue
     if ($auditpol) {
         Write-Status '+' 'auditpol.exe' Green
@@ -156,7 +156,7 @@ if ($isWindows) {
     Write-Host ''
 }
 
-# ── Summary ──
+# -- Summary --
 Write-Host '  ======================================' -ForegroundColor DarkGray
 if ($isDomainJoined) {
     Write-Status '+' 'Ready: Domain-joined - all features available' Green

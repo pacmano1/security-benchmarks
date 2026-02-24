@@ -1,7 +1,7 @@
 function Test-CISServices {
     <#
     .SYNOPSIS
-        Audits CIS Section 5 — System Services.
+        Audits CIS Section 5 - System Services.
     .DESCRIPTION
         Checks that specified services are disabled (or not installed).
     #>
@@ -58,7 +58,7 @@ function Test-CISServices {
                 Detail   = "Service: $serviceName"
             }
         } catch [Microsoft.PowerShell.Commands.ServiceCommandException] {
-            # Service not installed — that's compliant for "Disabled" requirement
+            # Service not installed - that's compliant for "Disabled" requirement
             if ($expectedType -eq 'Disabled') {
                 [PSCustomObject]@{
                     Id       = $ctl.Id

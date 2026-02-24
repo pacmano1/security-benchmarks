@@ -5,7 +5,7 @@
     Pester tests for CIS Benchmark automation module.
 .DESCRIPTION
     Tests configuration loading, module structure, control definitions,
-    and helper function behavior. Does NOT require a domain environment —
+    and helper function behavior. Does NOT require a domain environment -
     tests run against config files and mocked commands.
 #>
 
@@ -22,9 +22,9 @@ BeforeAll {
     }
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 # Configuration file tests
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 Describe 'Configuration Files' {
     Context 'master-config.psd1' {
         BeforeAll {
@@ -127,9 +127,9 @@ Describe 'Configuration Files' {
     }
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 # Module structure tests
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 Describe 'Module Structure' {
     Context 'PowerShell module files' {
         It 'should have CISBenchmark.psm1' {
@@ -200,9 +200,9 @@ Describe 'Module Structure' {
     }
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 # Write-CISLog tests
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 Describe 'Write-CISLog' {
     BeforeAll {
         $script:CISConfig = @{ LogLevel = 'Debug' }
@@ -234,9 +234,9 @@ Describe 'Write-CISLog' {
     }
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 # Control definition quality tests
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 Describe 'Control Definition Quality' {
     BeforeAll {
         $moduleDir = Join-Path (Join-Path $ProjectRoot 'config') 'modules'
@@ -317,9 +317,9 @@ Describe 'Control Definition Quality' {
     }
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 # Export-CISReport tests
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 Describe 'Export-CISReport' {
     BeforeAll {
         $script:CISConfig = @{
@@ -371,9 +371,9 @@ Describe 'Export-CISReport' {
     }
 }
 
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 # Total control count
-# ═══════════════════════════════════════════════════════════════════════════════
+# ===============================================================================
 Describe 'Control Coverage Summary' {
     It 'should have a meaningful number of controls defined across all modules' {
         $moduleDir = Join-Path (Join-Path $ProjectRoot 'config') 'modules'

@@ -1,10 +1,10 @@
 function Set-CISAccountPolicies {
     <#
     .SYNOPSIS
-        Placeholder for CIS Section 1 — Account Policies apply.
+        Placeholder for CIS Section 1 - Account Policies apply.
     .DESCRIPTION
         In AWS Managed AD, domain password and lockout policies are owned
-        by AWS. This function does NOT apply changes — it only warns.
+        by AWS. This function does NOT apply changes - it only warns.
         Use the AWS Directory Service console to manage these settings.
     #>
     [CmdletBinding()]

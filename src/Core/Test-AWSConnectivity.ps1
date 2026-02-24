@@ -20,7 +20,7 @@ function Test-AWSConnectivity {
     $results = [ordered]@{}
     $allPassed = $true
 
-    # ── WinRM service ──
+    # -- WinRM service --
     try {
         $winrm = Get-Service -Name WinRM -ErrorAction Stop
         if ($winrm.Status -eq 'Running') {
@@ -37,7 +37,7 @@ function Test-AWSConnectivity {
         Write-CISLog -Message "WinRM check failed: $_" -Level Error
     }
 
-    # ── WinRM listener ──
+    # -- WinRM listener --
     try {
         $listeners = Get-WSManInstance -ResourceURI winrm/config/listener -Enumerate -ErrorAction Stop
         if ($listeners) {
@@ -53,7 +53,7 @@ function Test-AWSConnectivity {
         Write-CISLog -Message "WinRM listener check: $_" -Level Warning
     }
 
-    # ── SSM Agent ──
+    # -- SSM Agent --
     try {
         $ssm = Get-Service -Name AmazonSSMAgent -ErrorAction Stop
         if ($ssm.Status -eq 'Running') {
@@ -69,7 +69,7 @@ function Test-AWSConnectivity {
         Write-CISLog -Message 'SSM Agent not found - may not be an EC2 instance' -Level Warning
     }
 
-    # ── RDP ──
+    # -- RDP --
     if ($CheckRDP) {
         try {
             $rdp = Get-Service -Name TermService -ErrorAction Stop
@@ -98,7 +98,7 @@ function Test-AWSConnectivity {
         }
     }
 
-    # ── Firewall rules for management ──
+    # -- Firewall rules for management --
     try {
         $fwRules = Get-NetFirewallRule -Enabled True -Action Allow -ErrorAction SilentlyContinue |
             Where-Object { $_.DisplayName -match 'Remote Desktop|Windows Remote Management|WinRM' }

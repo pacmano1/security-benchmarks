@@ -9,7 +9,7 @@ function New-CISGpoFramework {
     .PARAMETER DryRun
         If $true, logs what would be created without modifying AD.
     .OUTPUTS
-        Hashtable mapping module name → GPO name.
+        Hashtable mapping module name -> GPO name.
     #>
     [CmdletBinding()]
     param(

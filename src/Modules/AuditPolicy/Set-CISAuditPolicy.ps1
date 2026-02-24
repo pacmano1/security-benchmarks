@@ -1,7 +1,7 @@
 function Set-CISAuditPolicy {
     <#
     .SYNOPSIS
-        Applies CIS Section 17 — Advanced Audit Policy via GPO audit.csv.
+        Applies CIS Section 17 - Advanced Audit Policy via GPO audit.csv.
     .PARAMETER GpoName
         Name of the GPO to configure.
     .PARAMETER DryRun
@@ -31,7 +31,7 @@ function Set-CISAuditPolicy {
         return
     }
 
-    # ── Build audit.csv and write to GPO SYSVOL ──
+    # -- Build audit.csv and write to GPO SYSVOL --
     try {
         $gpo = Get-GPO -Name $GpoName -ErrorAction Stop
     } catch {
@@ -74,9 +74,9 @@ function Set-CISAuditPolicy {
     Update-GpoExtensionAttribute -GpoName $GpoName -CSE $auditCSE
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 # Helper: update gPCMachineExtensionNames to include a CSE GUID pair
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 function Update-GpoExtensionAttribute {
     param(
         [string]$GpoName,

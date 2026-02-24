@@ -41,11 +41,11 @@ Write-Host '  CIS Benchmark L1 - Apply Settings' -ForegroundColor White
 Write-Host '  ==================================' -ForegroundColor DarkGray
 Write-Host ''
 
-# ── Import module ──
+# -- Import module --
 $modulePath = Join-Path (Join-Path $ProjectRoot 'src') 'CISBenchmark.psm1'
 Import-Module $modulePath -Force
 
-# ── Initialize ──
+# -- Initialize --
 Write-Host '  [1/6] Initializing...' -ForegroundColor Cyan
 $config = Initialize-CISEnvironment -ProjectRoot $ProjectRoot -SkipPrereqCheck:$SkipPrereqCheck
 
@@ -58,7 +58,7 @@ if ($isDryRun) {
     Write-Host '    !  Mode: LIVE (changes will be applied)' -ForegroundColor Red
 }
 
-# ── Safety confirmation ──
+# -- Safety confirmation --
 if (-not $isDryRun -and -not $Force) {
     Write-Host ''
     Write-Host '  +----------------------------------------------------------+' -ForegroundColor Yellow
@@ -77,7 +77,7 @@ if (-not $isDryRun -and -not $Force) {
     Write-Host ''
 }
 
-# ── Pre-flight connectivity ──
+# -- Pre-flight connectivity --
 if ($config.HaltOnConnectivityFailure -and -not $SkipPrereqCheck) {
     Write-Host '  [2/6] Pre-flight connectivity check...' -ForegroundColor Cyan
     $preFlight = Test-AWSConnectivity
@@ -91,14 +91,14 @@ if ($config.HaltOnConnectivityFailure -and -not $SkipPrereqCheck) {
     Write-Host '  [2/6] Pre-flight check skipped' -ForegroundColor DarkGray
 }
 
-# ── Determine modules ──
+# -- Determine modules --
 $modulesToApply = if ($Modules) {
     $Modules
 } else {
     $config.Modules.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key }
 }
 
-# ── Backup current state ──
+# -- Backup current state --
 if (-not $isDryRun) {
     Write-Host '  [3/6] Creating state backup...' -ForegroundColor Cyan
     $backupPath = Backup-CISState -Modules $modulesToApply
@@ -107,12 +107,12 @@ if (-not $isDryRun) {
     Write-Host '  [3/6] Backup skipped (dry run)' -ForegroundColor DarkGray
 }
 
-# ── Create GPO framework ──
+# -- Create GPO framework --
 Write-Host '  [4/6] Creating GPO framework...' -ForegroundColor Cyan
 $gpoMap = New-CISGpoFramework -DryRun $isDryRun
 Write-Host "    +  $($gpoMap.Count) GPOs configured" -ForegroundColor Green
 
-# ── Apply each module ──
+# -- Apply each module --
 Write-Host "  [5/6] Applying $($modulesToApply.Count) modules..." -ForegroundColor Cyan
 Write-Host ''
 
@@ -155,7 +155,7 @@ foreach ($modName in $applyOrder) {
 
 Write-Host ''
 
-# ── Post-flight connectivity ──
+# -- Post-flight connectivity --
 if ($config.PostFlightCheck -and -not $isDryRun -and -not $SkipPrereqCheck) {
     Write-Host '  [6/6] Post-flight connectivity check...' -ForegroundColor Cyan
     $postFlight = Test-AWSConnectivity
@@ -176,7 +176,7 @@ if ($config.PostFlightCheck -and -not $isDryRun -and -not $SkipPrereqCheck) {
     Write-Host '  [6/6] Post-flight check skipped' -ForegroundColor DarkGray
 }
 
-# ── Run audit to show compliance delta ──
+# -- Run audit to show compliance delta --
 Write-Host ''
 Write-Host '  Running post-apply compliance audit...' -ForegroundColor Cyan
 

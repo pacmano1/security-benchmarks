@@ -15,7 +15,7 @@ function Get-CISConfiguration {
         [string]$ProjectRoot
     )
 
-    # ── Master config ──
+    # -- Master config --
     $masterPath = Join-Path (Join-Path $ProjectRoot 'config') 'master-config.psd1'
     if (-not (Test-Path $masterPath)) {
         throw "Master config not found: $masterPath"
@@ -25,7 +25,7 @@ function Get-CISConfiguration {
 
     Write-CISLog -Message "Loaded master config ($($config.BenchmarkVersion))" -Level Info
 
-    # ── AWS exclusions ──
+    # -- AWS exclusions --
     $exclPath = Join-Path (Join-Path $ProjectRoot 'config') 'aws-exclusions.psd1'
     if (Test-Path $exclPath) {
         $config.AWSExclusions = Import-PowerShellDataFile -Path $exclPath
@@ -35,7 +35,7 @@ function Get-CISConfiguration {
         Write-CISLog -Message 'No AWS exclusions file found - proceeding without exclusions' -Level Warning
     }
 
-    # ── Module configs ──
+    # -- Module configs --
     $config.ModuleConfigs = @{}
     $modulesDir = Join-Path (Join-Path $ProjectRoot 'config') 'modules'
 
@@ -55,7 +55,7 @@ function Get-CISConfiguration {
         }
     }
 
-    # ── Apply exclusions ──
+    # -- Apply exclusions --
     # Mark skipped controls
     $skipIds = $config.AWSExclusions.Skip
     foreach ($modName in $config.ModuleConfigs.Keys) {

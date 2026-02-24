@@ -1,7 +1,7 @@
 function Test-CISUserRightsAssignment {
     <#
     .SYNOPSIS
-        Audits CIS Section 2.2 — User Rights Assignment.
+        Audits CIS Section 2.2 - User Rights Assignment.
     .DESCRIPTION
         Exports security policy via secedit and compares privilege
         assignments against CIS-required values.
@@ -43,7 +43,7 @@ function Test-CISUserRightsAssignment {
         $actual   = $seceditData[$key]
 
         if ($null -eq $actual -and [string]::IsNullOrEmpty($expected)) {
-            # Not set and expected empty — pass
+            # Not set and expected empty - pass
             [PSCustomObject]@{
                 Id       = $ctl.Id
                 Title    = $ctl.Title
@@ -73,7 +73,7 @@ function Test-CISUserRightsAssignment {
         $expectedSorted = ($expected -split ',' | ForEach-Object { $_.Trim() } | Sort-Object) -join ','
         $actualSorted   = ($actual -split ',' | ForEach-Object { $_.Trim() } | Sort-Object) -join ','
 
-        # For "No One" — expected is empty, actual must be empty
+        # For "No One" - expected is empty, actual must be empty
         if ([string]::IsNullOrEmpty($expected)) {
             $pass = [string]::IsNullOrWhiteSpace($actual)
         } else {

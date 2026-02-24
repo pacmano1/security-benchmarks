@@ -1,7 +1,7 @@
 function Test-CISSecurityOptions {
     <#
     .SYNOPSIS
-        Audits CIS Section 2.3 — Security Options controls.
+        Audits CIS Section 2.3 - Security Options controls.
     .DESCRIPTION
         Reads registry values and secedit output to determine compliance.
         Returns an array of result objects for the report.
@@ -16,7 +16,7 @@ function Test-CISSecurityOptions {
         return @()
     }
 
-    # ── Export secedit once for all secedit-based controls ──
+    # -- Export secedit once for all secedit-based controls --
     $seceditData = @{}
     $hasSecedit  = $controls | Where-Object { $_.Secedit }
     if ($hasSecedit) {
@@ -77,9 +77,9 @@ function Test-CISSecurityOptions {
     return $results
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 # Helper: audit a single registry-based control
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 function Test-RegistryControl {
     param(
         [hashtable]$Control,
@@ -136,9 +136,9 @@ function Test-RegistryControl {
     }
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 # Helper: export secedit security policy to a hashtable
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 function Get-SeceditExport {
     $tempFile = Join-Path $env:TEMP "cis_secedit_$(Get-Random).inf"
     try {
@@ -157,9 +157,9 @@ function Get-SeceditExport {
     }
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 # Helper: audit a single secedit-based control
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 function Test-SeceditControl {
     param(
         [hashtable]$Control,

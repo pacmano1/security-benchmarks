@@ -18,14 +18,14 @@ function Initialize-CISEnvironment {
         [switch]$SkipPrereqCheck
     )
 
-    # ── Set up log file early so Write-CISLog can write to it ──
+    # -- Set up log file early so Write-CISLog can write to it --
     $logDir = Join-Path $ProjectRoot 'reports'
     if (-not (Test-Path $logDir)) { New-Item -Path $logDir -ItemType Directory -Force | Out-Null }
     $script:LogFile = Join-Path $logDir ("CIS-{0}.log" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
 
     Write-CISLog -Message '=== CIS Benchmark Automation - Initializing ===' -Level Info
 
-    # ── OS check ──
+    # -- OS check --
     if (-not $SkipPrereqCheck) {
         $os = Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction SilentlyContinue
         if ($os) {
@@ -38,7 +38,7 @@ function Initialize-CISEnvironment {
         }
     }
 
-    # ── Required PowerShell modules ──
+    # -- Required PowerShell modules --
     $requiredModules = @('GroupPolicy', 'ActiveDirectory')
     if (-not $SkipPrereqCheck) {
         foreach ($mod in $requiredModules) {
@@ -51,10 +51,10 @@ function Initialize-CISEnvironment {
         }
     }
 
-    # ── Load configuration ──
+    # -- Load configuration --
     $config = Get-CISConfiguration -ProjectRoot $ProjectRoot
 
-    # ── Ensure output directories ──
+    # -- Ensure output directories --
     $reportsDir = Join-Path $ProjectRoot 'reports'
     $backupsDir = Join-Path $ProjectRoot 'backups'
     foreach ($dir in @($reportsDir, $backupsDir)) {

@@ -31,7 +31,7 @@ function Export-CISReport {
     $timestamp = Get-Date -Format 'yyyyMMdd-HHmmss'
     $datePretty = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 
-    # ── Summary stats ──
+    # -- Summary stats --
     $total   = $Results.Count
     $passed  = ($Results | Where-Object { $_.Status -eq 'Pass' }).Count
     $failed  = ($Results | Where-Object { $_.Status -eq 'Fail' }).Count
@@ -39,7 +39,7 @@ function Export-CISReport {
     $errors  = ($Results | Where-Object { $_.Status -eq 'Error' }).Count
     $pct     = if ($total -gt 0) { [math]::Round(($passed / ($total - $skipped)) * 100, 1) } else { 0 }
 
-    # ── JSON ──
+    # -- JSON --
     if ($Formats -contains 'JSON') {
         $jsonPath = Join-Path $OutputDir "CIS-Report-$timestamp.json"
         $jsonPayload = [ordered]@{
@@ -61,7 +61,7 @@ function Export-CISReport {
         Write-CISLog -Message "JSON report: $jsonPath" -Level Info
     }
 
-    # ── HTML ──
+    # -- HTML --
     if ($Formats -contains 'HTML') {
         $htmlPath = Join-Path $OutputDir "CIS-Report-$timestamp.html"
 

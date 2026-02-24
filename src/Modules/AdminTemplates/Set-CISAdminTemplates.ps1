@@ -1,7 +1,7 @@
 function Set-CISAdminTemplates {
     <#
     .SYNOPSIS
-        Applies CIS Section 18 — Administrative Templates (Computer) via GPO.
+        Applies CIS Section 18 - Administrative Templates (Computer) via GPO.
     .DESCRIPTION
         All controls are registry-based. Uses Set-GPRegistryValue to write
         settings into the specified GPO.

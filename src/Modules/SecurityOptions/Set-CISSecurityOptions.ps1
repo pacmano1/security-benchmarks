@@ -1,7 +1,7 @@
 function Set-CISSecurityOptions {
     <#
     .SYNOPSIS
-        Applies CIS Section 2.3 — Security Options via GPO.
+        Applies CIS Section 2.3 - Security Options via GPO.
     .DESCRIPTION
         For registry-based controls: uses Set-GPRegistryValue.
         For secedit-based controls: writes GptTmpl.inf to the GPO SYSVOL path.
@@ -29,7 +29,7 @@ function Set-CISSecurityOptions {
     $registryControls = $controls | Where-Object { $_.Registry -and -not $_.Skipped }
     $seceditControls  = $controls | Where-Object { $_.Secedit -and -not $_.Skipped }
 
-    # ── Registry-based controls → Set-GPRegistryValue ──
+    # -- Registry-based controls -> Set-GPRegistryValue --
     foreach ($ctl in $registryControls) {
         $reg = $ctl.Registry
         # Check AWS exclusion modifications
@@ -48,7 +48,7 @@ function Set-CISSecurityOptions {
         }
     }
 
-    # ── Secedit-based controls → GptTmpl.inf ──
+    # -- Secedit-based controls -> GptTmpl.inf --
     if ($seceditControls) {
         if ($DryRun) {
             foreach ($ctl in $seceditControls) {
@@ -60,9 +60,9 @@ function Set-CISSecurityOptions {
     }
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 # Helper: check if AWS exclusions modify a control value
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 function Get-AWSModifiedValue {
     param(
         [string]$ControlId,
@@ -78,9 +78,9 @@ function Get-AWSModifiedValue {
     return $DefaultValue
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 # Helper: write secedit entries into GptTmpl.inf on SYSVOL
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 function Write-GptTmplEntries {
     param(
         [string]$GpoName,

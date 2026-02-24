@@ -29,15 +29,15 @@ Write-Host '  CIS Benchmark L1 - Compliance Audit' -ForegroundColor White
 Write-Host '  ====================================' -ForegroundColor DarkGray
 Write-Host ''
 
-# ── Import module ──
+# -- Import module --
 $modulePath = Join-Path (Join-Path $ProjectRoot 'src') 'CISBenchmark.psm1'
 Import-Module $modulePath -Force
 
-# ── Initialize ──
+# -- Initialize --
 Write-Host '  [1/4] Initializing...' -ForegroundColor Cyan
 $config = Initialize-CISEnvironment -ProjectRoot $ProjectRoot -SkipPrereqCheck:$SkipPrereqCheck
 
-# ── Pre-flight connectivity ──
+# -- Pre-flight connectivity --
 if ($config.HaltOnConnectivityFailure -and -not $SkipPrereqCheck) {
     Write-Host '  [2/4] Pre-flight connectivity check...' -ForegroundColor Cyan
     $connectivity = Test-AWSConnectivity
@@ -51,14 +51,14 @@ if ($config.HaltOnConnectivityFailure -and -not $SkipPrereqCheck) {
     Write-Host '  [2/4] Pre-flight check skipped' -ForegroundColor DarkGray
 }
 
-# ── Determine which modules to audit ──
+# -- Determine which modules to audit --
 $modulesToAudit = if ($Modules) {
     $Modules
 } else {
     $config.Modules.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key }
 }
 
-# ── Run each module's Test function ──
+# -- Run each module's Test function --
 Write-Host "  [3/4] Auditing $($modulesToAudit.Count) modules..." -ForegroundColor Cyan
 Write-Host ''
 
@@ -110,7 +110,7 @@ foreach ($modName in $modulesToAudit) {
 
 Write-Host ''
 
-# ── Generate report ──
+# -- Generate report --
 Write-Host '  [4/4] Generating report...' -ForegroundColor Cyan
 
 if ($allResults.Count -gt 0) {

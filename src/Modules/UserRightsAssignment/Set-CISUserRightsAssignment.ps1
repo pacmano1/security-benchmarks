@@ -1,7 +1,7 @@
 function Set-CISUserRightsAssignment {
     <#
     .SYNOPSIS
-        Applies CIS Section 2.2 — User Rights Assignment via GPO GptTmpl.inf.
+        Applies CIS Section 2.2 - User Rights Assignment via GPO GptTmpl.inf.
     .PARAMETER GpoName
         Name of the GPO to configure.
     .PARAMETER DryRun

@@ -98,7 +98,7 @@ function Restore-CISState {
         }
     }
 
-    # ── Force group policy update ──
+    # -- Force group policy update --
     Write-CISLog -Message 'Forcing Group Policy update...' -Level Info
     try {
         $null = gpupdate.exe /force /wait:30 2>&1

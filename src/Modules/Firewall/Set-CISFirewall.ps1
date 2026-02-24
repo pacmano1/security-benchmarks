@@ -1,7 +1,7 @@
 function Set-CISFirewall {
     <#
     .SYNOPSIS
-        Applies CIS Section 9 — Windows Firewall settings via GPO.
+        Applies CIS Section 9 - Windows Firewall settings via GPO.
     .PARAMETER GpoName
         Name of the GPO to configure.
     .PARAMETER DryRun

@@ -1,7 +1,7 @@
 function Test-CISAdminTemplates {
     <#
     .SYNOPSIS
-        Audits CIS Section 18 — Administrative Templates (Computer) controls.
+        Audits CIS Section 18 - Administrative Templates (Computer) controls.
     .DESCRIPTION
         All controls are registry-based. Reads current values and compares
         against CIS-required values.

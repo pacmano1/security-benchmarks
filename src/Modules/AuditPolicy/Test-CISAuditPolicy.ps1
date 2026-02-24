@@ -1,7 +1,7 @@
 function Test-CISAuditPolicy {
     <#
     .SYNOPSIS
-        Audits CIS Section 17 — Advanced Audit Policy Configuration.
+        Audits CIS Section 17 - Advanced Audit Policy Configuration.
     .DESCRIPTION
         Uses auditpol.exe /get to read current audit subcategory settings
         and compares against CIS-required values.
@@ -16,7 +16,7 @@ function Test-CISAuditPolicy {
         return @()
     }
 
-    # ── Get all audit policy settings at once ──
+    # -- Get all audit policy settings at once --
     $auditData = Get-AuditPolData
 
     $total = $controls.Count
@@ -74,9 +74,9 @@ function Test-CISAuditPolicy {
     return $results
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 # Helper: parse auditpol output into a hashtable
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 function Get-AuditPolData {
     $data = @{}
 
@@ -97,9 +97,9 @@ function Get-AuditPolData {
     return $data
 }
 
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 # Helper: check if actual audit setting meets the CIS requirement
-# ─────────────────────────────────────────────────────────────────────────────
+# -----------------------------------------------------------------------------
 function Test-AuditSettingCompliance {
     param(
         [string]$Actual,
@@ -116,10 +116,10 @@ function Test-AuditSettingCompliance {
     # "Success and Failure" satisfies any requirement
     if ($a -eq 'success and failure') { return $true }
 
-    # "Include Success" — actual must contain success
+    # "Include Success" - actual must contain success
     if ($e -match 'include success' -and $a -match 'success') { return $true }
 
-    # "Include Failure" — actual must contain failure
+    # "Include Failure" - actual must contain failure
     if ($e -match 'include failure' -and $a -match 'failure') { return $true }
 
     return $false
