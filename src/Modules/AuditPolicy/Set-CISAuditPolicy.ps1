@@ -47,18 +47,17 @@ function Set-CISAuditPolicy {
             $subcategory = $ctl.Subcategory
             $setting     = $ctl.InclusionSetting
 
-            # Build auditpol flags
-            $auditpolArgs = @('/set', '/subcategory:"{0}"' -f $subcategory)
-
+            # Map setting to success/failure flags
+            $successFlag = 'disable'
+            $failureFlag = 'disable'
             switch ($setting) {
-                'Success'             { $auditpolArgs += '/success:enable';  $auditpolArgs += '/failure:disable' }
-                'Failure'             { $auditpolArgs += '/success:disable'; $auditpolArgs += '/failure:enable' }
-                'Success and Failure' { $auditpolArgs += '/success:enable';  $auditpolArgs += '/failure:enable' }
-                'No Auditing'         { $auditpolArgs += '/success:disable'; $auditpolArgs += '/failure:disable' }
+                'Success'             { $successFlag = 'enable' }
+                'Failure'             { $failureFlag = 'enable' }
+                'Success and Failure' { $successFlag = 'enable'; $failureFlag = 'enable' }
             }
 
             try {
-                $result = & auditpol.exe $auditpolArgs 2>&1
+                $result = auditpol.exe /set /subcategory:"$subcategory" /success:$successFlag /failure:$failureFlag 2>&1
                 if ($LASTEXITCODE -eq 0) {
                     Write-CISLog -Message "[LOCAL] auditpol: $subcategory = $setting" -Level Info -ControlId $ctl.Id
                     $applied++
