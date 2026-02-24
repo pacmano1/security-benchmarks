@@ -11,7 +11,7 @@
 
 BeforeAll {
     $ProjectRoot = Split-Path $PSScriptRoot -Parent
-    $ModulePath  = Join-Path $ProjectRoot 'src' 'CISBenchmark.psm1'
+    $ModulePath  = Join-Path (Join-Path $ProjectRoot 'src') 'CISBenchmark.psm1'
 
     # Import module fresh
     Import-Module $ModulePath -Force

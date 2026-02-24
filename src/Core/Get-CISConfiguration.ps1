@@ -16,7 +16,7 @@ function Get-CISConfiguration {
     )
 
     # ── Master config ──
-    $masterPath = Join-Path $ProjectRoot 'config' 'master-config.psd1'
+    $masterPath = Join-Path (Join-Path $ProjectRoot 'config') 'master-config.psd1'
     if (-not (Test-Path $masterPath)) {
         throw "Master config not found: $masterPath"
     }
@@ -26,7 +26,7 @@ function Get-CISConfiguration {
     Write-CISLog -Message "Loaded master config ($($config.BenchmarkVersion))" -Level Info
 
     # ── AWS exclusions ──
-    $exclPath = Join-Path $ProjectRoot 'config' 'aws-exclusions.psd1'
+    $exclPath = Join-Path (Join-Path $ProjectRoot 'config') 'aws-exclusions.psd1'
     if (Test-Path $exclPath) {
         $config.AWSExclusions = Import-PowerShellDataFile -Path $exclPath
         Write-CISLog -Message "Loaded AWS exclusions ($($config.AWSExclusions.Skip.Count) skipped, $($config.AWSExclusions.Modify.Count) modified)" -Level Info
@@ -37,7 +37,7 @@ function Get-CISConfiguration {
 
     # ── Module configs ──
     $config.ModuleConfigs = @{}
-    $modulesDir = Join-Path $ProjectRoot 'config' 'modules'
+    $modulesDir = Join-Path (Join-Path $ProjectRoot 'config') 'modules'
 
     foreach ($modName in $config.Modules.Keys) {
         if (-not $config.Modules[$modName]) {

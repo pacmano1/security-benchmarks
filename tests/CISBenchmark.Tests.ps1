@@ -11,7 +11,7 @@
 
 BeforeAll {
     $ProjectRoot = Split-Path $PSScriptRoot -Parent
-    $ModulePath  = Join-Path $ProjectRoot 'src' 'CISBenchmark.psm1'
+    $ModulePath  = Join-Path (Join-Path $ProjectRoot 'src') 'CISBenchmark.psm1'
 
     # Import the module
     Import-Module $ModulePath -Force
@@ -28,7 +28,7 @@ BeforeAll {
 Describe 'Configuration Files' {
     Context 'master-config.psd1' {
         BeforeAll {
-            $configPath = Join-Path $ProjectRoot 'config' 'master-config.psd1'
+            $configPath = Join-Path (Join-Path $ProjectRoot 'config') 'master-config.psd1'
         }
 
         It 'should exist' {
@@ -63,7 +63,7 @@ Describe 'Configuration Files' {
 
     Context 'aws-exclusions.psd1' {
         BeforeAll {
-            $exclPath = Join-Path $ProjectRoot 'config' 'aws-exclusions.psd1'
+            $exclPath = Join-Path (Join-Path $ProjectRoot 'config') 'aws-exclusions.psd1'
         }
 
         It 'should exist' {
@@ -88,7 +88,7 @@ Describe 'Configuration Files' {
 
     Context 'Module config files' {
         BeforeAll {
-            $moduleDir = Join-Path $ProjectRoot 'config' 'modules'
+            $moduleDir = Join-Path (Join-Path $ProjectRoot 'config') 'modules'
             $expectedModules = @(
                 'AccountPolicies'
                 'UserRightsAssignment'
@@ -133,11 +133,11 @@ Describe 'Configuration Files' {
 Describe 'Module Structure' {
     Context 'PowerShell module files' {
         It 'should have CISBenchmark.psm1' {
-            Join-Path $ProjectRoot 'src' 'CISBenchmark.psm1' | Should -Exist
+            Join-Path (Join-Path $ProjectRoot 'src') 'CISBenchmark.psm1' | Should -Exist
         }
 
         It 'should have CISBenchmark.psd1 manifest' {
-            Join-Path $ProjectRoot 'src' 'CISBenchmark.psd1' | Should -Exist
+            Join-Path (Join-Path $ProjectRoot 'src') 'CISBenchmark.psd1' | Should -Exist
         }
     }
 
@@ -195,7 +195,7 @@ Describe 'Module Structure' {
             'Invoke-CISAudit.ps1', 'Invoke-CISApply.ps1',
             'Invoke-CISRollback.ps1', 'Install-Prerequisites.ps1'
         ) {
-            Join-Path $ProjectRoot 'scripts' $_ | Should -Exist
+            Join-Path (Join-Path $ProjectRoot 'scripts') $_ | Should -Exist
         }
     }
 }
@@ -239,7 +239,7 @@ Describe 'Write-CISLog' {
 # ═══════════════════════════════════════════════════════════════════════════════
 Describe 'Control Definition Quality' {
     BeforeAll {
-        $moduleDir = Join-Path $ProjectRoot 'config' 'modules'
+        $moduleDir = Join-Path (Join-Path $ProjectRoot 'config') 'modules'
     }
 
     Context 'Registry-based controls' {
@@ -376,7 +376,7 @@ Describe 'Export-CISReport' {
 # ═══════════════════════════════════════════════════════════════════════════════
 Describe 'Control Coverage Summary' {
     It 'should have a meaningful number of controls defined across all modules' {
-        $moduleDir = Join-Path $ProjectRoot 'config' 'modules'
+        $moduleDir = Join-Path (Join-Path $ProjectRoot 'config') 'modules'
         $totalControls = 0
 
         Get-ChildItem -Path $moduleDir -Filter '*.psd1' | ForEach-Object {

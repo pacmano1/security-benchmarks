@@ -37,7 +37,7 @@ Write-Host '  ============================' -ForegroundColor DarkGray
 Write-Host ''
 
 # ── Import module ──
-$modulePath = Join-Path $ProjectRoot 'src' 'CISBenchmark.psm1'
+$modulePath = Join-Path (Join-Path $ProjectRoot 'src') 'CISBenchmark.psm1'
 Import-Module $modulePath -Force
 
 # ── Initialize (minimal - just logging + config) ──
