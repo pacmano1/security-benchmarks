@@ -151,30 +151,6 @@ $gpoMap = @{}
 if ($isLocalMode) {
     Write-Host '  [4/7] Preparing local policy apply...' -ForegroundColor Cyan
 
-    # Skip controls that break RDP on standalone machines (NLA/TLS require domain)
-    $localPolicySkipIds = @(
-        '18.9.35.3.9.1'   # fPromptForPassword - can block RDP credential negotiation
-        '18.9.35.3.9.2'   # fEncryptRPCTraffic - can block RDP RPC communication
-        '18.9.35.3.9.3'   # SecurityLayer = 2 (TLS) - requires valid cert/domain trust
-        '18.9.35.3.9.4'   # UserAuthentication = 1 (NLA) - requires domain auth
-        '18.9.35.3.9.5'   # MinEncryptionLevel = 3 (High) - can block RDP without TLS
-    )
-    $skippedCount = 0
-    foreach ($modName in $config.ModuleConfigs.Keys) {
-        $controls = $config.ModuleConfigs[$modName].Controls
-        if (-not $controls) { continue }
-        foreach ($ctl in $controls) {
-            if ($localPolicySkipIds -contains $ctl.Id -and -not $ctl.Skipped) {
-                $ctl.Skipped    = $true
-                $ctl.SkipReason = 'Skipped in local policy mode (breaks RDP on standalone machines)'
-                $skippedCount++
-            }
-        }
-    }
-    if ($skippedCount -gt 0) {
-        Write-Host "    -  Skipped $skippedCount RDP controls (NLA/TLS require domain)" -ForegroundColor Yellow
-    }
-
     # Map each module to a placeholder name
     foreach ($modName in $modulesToApply) {
         $gpoMap[$modName] = '__LocalPolicy__'
@@ -240,61 +216,6 @@ foreach ($modName in $applyOrder) {
 }
 
 Write-Host ''
-
-# -- RDP safety: ensure RDP works on standalone machines --
-if ($isLocalMode -and -not $isDryRun) {
-    $rdpFixed = $false
-    $tsPolPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services'
-    $tsPath    = 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server'
-    $rdpTcpPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp'
-
-    # Remove all RDP policy overrides that can block connections
-    if (Test-Path $tsPolPath) {
-        $rdpPolicyValues = @('UserAuthentication', 'SecurityLayer', 'MinEncryptionLevel', 'fPromptForPassword', 'fEncryptRPCTraffic')
-        foreach ($valName in $rdpPolicyValues) {
-            $current = Get-ItemProperty -Path $tsPolPath -Name $valName -ErrorAction SilentlyContinue
-            if ($null -ne $current.$valName) {
-                Remove-ItemProperty -Path $tsPolPath -Name $valName -ErrorAction SilentlyContinue
-                $rdpFixed = $true
-            }
-        }
-    }
-
-    # Ensure RDP is enabled
-    $fDeny = (Get-ItemProperty -Path $tsPath -Name 'fDenyTSConnections' -ErrorAction SilentlyContinue).fDenyTSConnections
-    if ($fDeny -eq 1) {
-        Set-ItemProperty -Path $tsPath -Name 'fDenyTSConnections' -Value 0 -ErrorAction SilentlyContinue
-        $rdpFixed = $true
-    }
-
-    # Reset WinStations listener NLA/SecurityLayer
-    if (Test-Path $rdpTcpPath) {
-        $listenerNLA = (Get-ItemProperty -Path $rdpTcpPath -Name 'UserAuthentication' -ErrorAction SilentlyContinue).UserAuthentication
-        $listenerSL  = (Get-ItemProperty -Path $rdpTcpPath -Name 'SecurityLayer' -ErrorAction SilentlyContinue).SecurityLayer
-        if ($listenerNLA -eq 1) {
-            Set-ItemProperty -Path $rdpTcpPath -Name 'UserAuthentication' -Value 0 -ErrorAction SilentlyContinue
-            $rdpFixed = $true
-        }
-        if ($listenerSL -eq 2) {
-            Set-ItemProperty -Path $rdpTcpPath -Name 'SecurityLayer' -Value 0 -ErrorAction SilentlyContinue
-            $rdpFixed = $true
-        }
-    }
-
-    # Ensure firewall allows RDP
-    try {
-        Enable-NetFirewallRule -DisplayGroup 'Remote Desktop' -ErrorAction SilentlyContinue
-    } catch { }
-
-    # Restart TermService to pick up changes
-    if ($rdpFixed) {
-        try {
-            Restart-Service TermService -Force -ErrorAction SilentlyContinue
-        } catch { }
-        Write-Host '    !  Fixed RDP settings (removed NLA/TLS policy, enabled RDP, restarted TermService)' -ForegroundColor Yellow
-        Write-CISLog -Message 'Fixed RDP settings for standalone compatibility' -Level Warning
-    }
-}
 
 # -- Force policy refresh --
 if (-not $isDryRun) {
