@@ -6,13 +6,31 @@ The audit pipeline scans the current machine state against CIS L1 controls and p
 
 ## Running an Audit
 
-### Full Audit (All Enabled Modules)
+### Interactive Mode (Default)
+
+Simply run the script with no flags — it will prompt you for options:
 
 ```powershell
 .\scripts\Invoke-CISAudit.ps1
 ```
 
-This runs every module enabled in `master-config.psd1` and generates reports in `reports/`.
+You'll be asked:
+
+```
+  ? Does this server run IIS (web server)? [y/N]:
+  ? Audit all enabled modules or select specific ones? [A/s]:
+```
+
+- **IIS prompt:** If you answer `Y`, controls 5.6 (IISADMIN), 5.31 (WMSvc), and 5.40 (W3SVC) are skipped so IIS services are not flagged as non-compliant.
+- **Module prompt:** Press Enter to audit all enabled modules, or type `s` to pick from a numbered list.
+
+### Full Audit (All Enabled Modules)
+
+```powershell
+.\scripts\Invoke-CISAudit.ps1 -Force
+```
+
+The `-Force` flag skips all interactive prompts and uses defaults (all modules, no IIS exclusion).
 
 ### Audit Specific Modules
 
@@ -23,6 +41,18 @@ This runs every module enabled in `master-config.psd1` and generates reports in 
 # Multiple modules
 .\scripts\Invoke-CISAudit.ps1 -Modules SecurityOptions, AuditPolicy, Firewall
 ```
+
+When `-Modules` is passed, the module selection prompt is skipped.
+
+### IIS Servers
+
+On servers running IIS, use `-SkipIIS` to exclude IIS service controls without being prompted:
+
+```powershell
+.\scripts\Invoke-CISAudit.ps1 -SkipIIS
+```
+
+This skips controls 5.6 (IIS Admin Service), 5.31 (Web Management Service), and 5.40 (World Wide Web Publishing Service).
 
 ### Skip Prerequisite Checks
 
@@ -173,11 +203,14 @@ $summary = Export-CISReport -Results $results -Formats @('JSON')
 
 ## Scheduling Audits
 
-To run audits on a schedule (e.g., daily compliance check):
+To run audits on a schedule (e.g., daily compliance check), use `-Force` to skip all prompts:
 
 ```powershell
 # Example: Windows Task Scheduler action
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\security_benchmarks\scripts\Invoke-CISAudit.ps1" -SkipPrereqCheck
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\security_benchmarks\scripts\Invoke-CISAudit.ps1" -Force -SkipPrereqCheck
+
+# IIS server — also skip IIS controls
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "C:\security_benchmarks\scripts\Invoke-CISAudit.ps1" -Force -SkipIIS -SkipPrereqCheck
 ```
 
 Reports accumulate in `reports/` with timestamps — track compliance over time by comparing JSON reports.

@@ -50,12 +50,44 @@ No AD permissions, RSAT modules, or domain connectivity required.
 
 ---
 
+## Interactive Mode (Default)
+
+Simply run the script with no flags — it will prompt you for each option:
+
+```powershell
+.\scripts\Invoke-CISApply.ps1
+```
+
+You'll be asked:
+
+```
+  ? Run in DRY RUN (preview only) or LIVE mode? [D/l]:
+  ? Does this server run IIS (web server)? [y/N]:
+  ? Apply all enabled modules or select specific ones? [A/s]:
+  ? Disable unnecessary firewall rules (casting, mDNS, wireless display)? [y/N]:
+```
+
+- **Mode:** Press Enter for dry run (default), or `l` for live mode.
+- **IIS:** Answer `Y` if this server runs IIS — skips controls 5.6, 5.31, 5.40.
+- **Modules:** Press Enter for all, or `s` to pick from a numbered list.
+- **Firewall hardening:** Answer `Y` to disable consumer firewall rules (casting, mDNS, etc.).
+
+In live mode, you'll still be asked to type `YES` before any changes are made.
+
+Each prompt is skipped when its corresponding CLI parameter is passed (e.g., `-DryRun $false` skips the mode prompt, `-Modules Firewall` skips the module prompt, etc.).
+
+---
+
 ## Dry Run (Default)
 
 With `DryRun = $true` (the default), apply only *logs* what it would do:
 
 ```powershell
+# Interactive — prompts for options, defaults to dry run
 .\scripts\Invoke-CISApply.ps1
+
+# Non-interactive — skip all prompts
+.\scripts\Invoke-CISApply.ps1 -Force
 ```
 
 Output:
@@ -65,33 +97,33 @@ Output:
 [Info]  [DRY RUN] Would set HKLM\SOFTWARE\Policies\...\NoLockScreenCamera = 1
 [Info]  [DRY RUN] Would set HKLM\SOFTWARE\Policies\...\NoLockScreenSlideshow = 1
 ...
+
+  ==================================
+  Dry Run Complete
+  ---------------------------------
+    No changes were made. Run with LIVE mode to apply.
+  ==================================
 ```
 
-Review the dry run output to confirm the changes look correct.
+Review the dry run output to confirm the changes look correct. The post-apply compliance audit is skipped in dry run mode since no changes were made.
 
 ---
 
 ## Live Apply
 
-### Step 1: Set DryRun to False
+### Step 1: Run Apply
 
-Edit `config/master-config.psd1`:
 ```powershell
-DryRun = $false
+# Interactive — will prompt for mode, modules, IIS, firewall
+.\scripts\Invoke-CISApply.ps1
 ```
 
-Or pass it on the command line:
+Or pass the mode directly:
 ```powershell
 .\scripts\Invoke-CISApply.ps1 -DryRun $false
 ```
 
-### Step 2: Run Apply
-
-```powershell
-.\scripts\Invoke-CISApply.ps1
-```
-
-You'll be prompted to confirm:
+You'll be prompted to confirm before changes are made:
 ```
 ╔════════════════════════════════════════════════════════╗
 ║  WARNING: This will CREATE GPOs and APPLY settings!   ║
@@ -101,7 +133,7 @@ You'll be prompted to confirm:
 Type YES to proceed:
 ```
 
-### Step 3: Skip Confirmation (Automation)
+### Step 2: Skip All Prompts (Automation)
 
 ```powershell
 .\scripts\Invoke-CISApply.ps1 -DryRun $false -Force
@@ -118,11 +150,41 @@ Type YES to proceed:
 
 ---
 
+## IIS Servers (`-SkipIIS`)
+
+CIS Section 5 includes controls that disable IIS services. On servers that **run IIS**, these must be skipped.
+
+In interactive mode, the script asks: `Does this server run IIS (web server)? [y/N]`
+
+For automation, use the `-SkipIIS` flag:
+
+```powershell
+# Apply on an IIS server (skip IIS service controls)
+.\scripts\Invoke-CISApply.ps1 -DryRun $false -SkipIIS
+
+# Automation — skip all prompts + skip IIS controls
+.\scripts\Invoke-CISApply.ps1 -DryRun $false -Force -SkipIIS
+```
+
+Controls skipped by `-SkipIIS`:
+
+| Control | Service | Description |
+|---|---|---|
+| 5.6 | IISADMIN | IIS Admin Service |
+| 5.31 | WMSvc | Web Management Service |
+| 5.40 | W3SVC | World Wide Web Publishing Service |
+
+These controls appear as **Skipped** in audit reports with reason "IIS server — service must remain enabled".
+
+---
+
 ## Firewall Rule Hardening (Optional)
 
 Windows ships with default firewall allow rules for consumer features (casting, wireless display, mDNS, etc.) that are inappropriate on hardened servers. The CIS Firewall module (Section 9) only covers firewall **profile settings** -- it doesn't manage individual rules.
 
-Use the `-HardenFirewallRules` switch to disable these unnecessary rule groups:
+In interactive mode, the script asks: `Disable unnecessary firewall rules (casting, mDNS, wireless display)? [y/N]`
+
+For automation, use the `-HardenFirewallRules` switch:
 
 ```powershell
 # Preview what would be disabled (dry run)
@@ -214,8 +276,8 @@ Creates a timestamped backup in `backups/CIS-Backup-<timestamp>/`:
 ### Step 7: Post-Flight Connectivity Check (Domain Only)
 Re-validates WinRM, SSM, and RDP. Skipped in local policy mode.
 
-### Step 8: Post-Apply Compliance Report
-Runs a full audit and generates an updated report so you can see the compliance improvement.
+### Step 8: Post-Apply Compliance Report (Live Mode Only)
+In live mode, runs a full audit and generates an updated report so you can see the compliance improvement. Skipped in dry run mode (no changes to measure).
 
 ---
 
@@ -252,12 +314,15 @@ The local policy mode is ideal for building hardened AMIs:
 
 ```powershell
 # 1. Launch a fresh Windows Server 2025 instance
-# 2. Run prerequisites and CIS hardening
-.\scripts\Install-Prerequisites.ps1
-.\scripts\Invoke-CISApply.ps1 -DryRun $false -SkipPrereqCheck
+# 2. Run prerequisites and CIS hardening (use -Force to skip prompts)
+.\scripts\Install-Prerequisites.ps1 -Force
+.\scripts\Invoke-CISApply.ps1 -DryRun $false -Force -SkipPrereqCheck
+
+# For IIS servers, add -SkipIIS:
+.\scripts\Invoke-CISApply.ps1 -DryRun $false -Force -SkipPrereqCheck -SkipIIS
 
 # 3. Verify compliance
-.\scripts\Invoke-CISAudit.ps1 -SkipPrereqCheck
+.\scripts\Invoke-CISAudit.ps1 -Force -SkipPrereqCheck
 
 # 4. Save as AMI
 # 5. Launch EC2 instances from AMI and join to AD

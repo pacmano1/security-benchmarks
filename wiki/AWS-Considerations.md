@@ -57,6 +57,39 @@ AWS EC2 management relies on several Windows services. These are excluded from t
 
 ---
 
+## IIS Web Servers
+
+CIS Section 5 includes controls that disable IIS-related services. On servers running IIS, these must be excluded:
+
+| CIS Control | Service | Description |
+|---|---|---|
+| 5.6 | IISADMIN | IIS Admin Service |
+| 5.31 | WMSvc | Web Management Service |
+| 5.40 | W3SVC | World Wide Web Publishing Service |
+
+### How to Exclude
+
+Both the audit and apply scripts prompt interactively:
+
+```
+  ? Does this server run IIS (web server)? [y/N]:
+```
+
+Answer `Y` and those controls are dynamically skipped.
+
+For automation, pass the `-SkipIIS` flag:
+
+```powershell
+.\scripts\Invoke-CISAudit.ps1 -SkipIIS -Force
+.\scripts\Invoke-CISApply.ps1 -DryRun $false -SkipIIS -Force
+```
+
+Skipped controls appear in reports with status **Skipped** and reason "IIS server — service must remain enabled".
+
+> **Note:** Unlike the RDP/WinRM exclusions (which are in `aws-exclusions.psd1` and always applied), IIS exclusions are opt-in because not all servers run IIS.
+
+---
+
 ## SSM Agent Compatibility
 
 The AWS Systems Manager (SSM) Agent runs as **SYSTEM** (LocalSystem) and requires:

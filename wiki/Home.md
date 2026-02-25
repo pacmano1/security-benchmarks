@@ -15,10 +15,12 @@ Automated audit, enforcement, and rollback of **CIS Microsoft Windows Server 202
 
 ## Key Safety Features
 
+- **Interactive prompts** — scripts ask for options (mode, modules, IIS, firewall) instead of requiring CLI flags
 - **DryRun = $true by default** — nothing changes until you explicitly opt in
 - **Auto-detects environment** — domain-joined vs standalone, server vs workstation
 - **Pre/post-flight connectivity checks** — validates WinRM, SSM Agent, and RDP (domain mode only)
 - **AWS exclusions** — never disables RDP, WinRM, or SSM; never touches domain password policy
+- **IIS-aware** — prompts to skip IIS service controls on web servers (`-SkipIIS`)
 - **One GPO per module** (domain mode) — unlink a single GPO to disable an entire category instantly
 - **Full state backup** before every apply operation
 
@@ -34,21 +36,24 @@ Automated audit, enforcement, and rollback of **CIS Microsoft Windows Server 202
 notepad .\config\master-config.psd1    # Set TargetOU, GpoPrefix, enable/disable modules
 
 # 3. Audit current compliance (safe — read-only)
+#    The script prompts for IIS and module selection interactively.
 .\scripts\Invoke-CISAudit.ps1
 
 # 4. Review the HTML report in reports/
 
-# 5. When ready to apply (set DryRun = $false in master-config.psd1 first)
+# 5. When ready to apply — the script prompts for mode, IIS, modules, and firewall hardening
 .\scripts\Invoke-CISApply.ps1
 
-# 6. If something goes wrong
+# 6. If something goes wrong — prompts for backup selection and module scope
 .\scripts\Invoke-CISRollback.ps1
 ```
+
+> **Tip:** All scripts accept `-Force` to skip prompts (uses defaults) and `-SkipIIS` to exclude IIS service controls on web servers.
 
 ### Standalone (No Domain / Golden AMI)
 
 ```powershell
-# 1. Install prerequisites (auto-detects standalone mode)
+# 1. Install prerequisites (auto-detects standalone mode, prompts about RSAT)
 .\scripts\Install-Prerequisites.ps1
 
 # 2. Audit current compliance
@@ -57,13 +62,13 @@ notepad .\config\master-config.psd1    # Set TargetOU, GpoPrefix, enable/disable
 # 3. Apply CIS hardening directly to local policy
 .\scripts\Invoke-CISApply.ps1 -DryRun $false -SkipPrereqCheck
 
-# 4. (Optional) Disable unnecessary firewall rules (casting, mDNS, etc.)
-.\scripts\Invoke-CISApply.ps1 -DryRun $false -SkipPrereqCheck -HardenFirewallRules
+# For IIS servers, add -SkipIIS:
+.\scripts\Invoke-CISApply.ps1 -DryRun $false -SkipPrereqCheck -SkipIIS
 
-# 5. Verify compliance
+# 4. Verify compliance
 .\scripts\Invoke-CISAudit.ps1 -SkipPrereqCheck
 
-# 6. Save as AMI for deployment
+# 5. Save as AMI for deployment
 ```
 
 ## Wiki Pages

@@ -13,24 +13,44 @@ The rollback pipeline reverts CIS Benchmark changes. On domain-joined machines, 
 
 ---
 
-## Quick Rollback (Most Recent Backup)
+## Interactive Rollback (Default)
+
+Run with no flags — the script will guide you through the options:
 
 ```powershell
 .\scripts\Invoke-CISRollback.ps1
 ```
 
-This automatically finds the latest backup in `backups/` and restores all GPOs.
+If multiple backups exist, you'll be shown a list:
 
-You'll be prompted:
 ```
-╔════════════════════════════════════════════════════════╗
-║  ROLLBACK: This will revert CIS Benchmark changes!   ║
-║  Backup: CIS-Backup-20250115-143015                  ║
-║  Mode: Restore GPOs to pre-apply state               ║
-╚════════════════════════════════════════════════════════╝
+  Available backups:
+    1. CIS-Backup-20250120-091500 (most recent)
+    2. CIS-Backup-20250115-143015
+    3. CIS-Backup-20250110-080000
 
-Type YES to proceed with rollback:
+  ? Select a backup [1] (default: most recent):
 ```
+
+Then you'll be asked about module scope:
+
+```
+  ? Rollback all modules or a specific one? [A/s]:
+```
+
+Type `s` to see a numbered list of modules in the backup and pick one, or press Enter to rollback all.
+
+Finally, you'll confirm with `YES` before any changes are made.
+
+---
+
+## Quick Rollback (Most Recent Backup)
+
+```powershell
+.\scripts\Invoke-CISRollback.ps1 -Force
+```
+
+The `-Force` flag skips all prompts: uses the most recent backup, rolls back all modules, and skips the `YES` confirmation.
 
 ---
 
@@ -42,13 +62,15 @@ Type YES to proceed with rollback:
 .\scripts\Invoke-CISRollback.ps1 -BackupPath .\backups\CIS-Backup-20250115-143015
 ```
 
+When `-BackupPath` is passed, the backup selection prompt is skipped.
+
 ### Rollback a Single Module
 
 ```powershell
 .\scripts\Invoke-CISRollback.ps1 -Module SecurityOptions
 ```
 
-Only the `CIS-L1-SecurityOptions` GPO is restored; other GPOs are untouched.
+Only the `CIS-L1-SecurityOptions` GPO is restored; other GPOs are untouched. When `-Module` is passed, the module scope prompt is skipped.
 
 ### Remove GPOs Entirely (Instead of Restoring)
 
@@ -58,13 +80,15 @@ Only the `CIS-L1-SecurityOptions` GPO is restored; other GPOs are untouched.
 
 This unlinks and **deletes** all CIS GPOs. Use when you want a clean slate rather than restoring prior settings.
 
+> **Note:** `-RemoveGPOs` is CLI-only — it is never offered as an interactive prompt due to its destructive nature.
+
 ### Remove a Single Module's GPO
 
 ```powershell
 .\scripts\Invoke-CISRollback.ps1 -Module Firewall -RemoveGPOs
 ```
 
-### Skip Confirmation
+### Skip All Prompts
 
 ```powershell
 .\scripts\Invoke-CISRollback.ps1 -Force
