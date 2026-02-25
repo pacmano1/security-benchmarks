@@ -9,9 +9,9 @@
       1. Removes NLA/TLS/encryption policy overrides from Terminal Services
       2. Ensures RDP is enabled (fDenyTSConnections = 0)
       3. Resets the WinStations RDP-Tcp listener to defaults
-      4. Removes firewall policy overrides that block inbound + ignore local rules
+      4. Removes entire firewall policy tree + resets via netsh
       5. Enables Remote Desktop firewall rules
-      6. Restarts TermService and Windows Firewall
+      6. Restarts TermService
       7. Prints diagnostic info
 .NOTES
     No reboot required. Try RDP immediately after running.
@@ -26,7 +26,7 @@ Write-Host '  =================' -ForegroundColor DarkGray
 Write-Host ''
 
 # -- Step 1: Remove all RDP policy overrides --
-Write-Host '  [1/7] Removing RDP policy overrides...' -ForegroundColor Cyan
+Write-Host '  [1/6] Removing RDP policy overrides...' -ForegroundColor Cyan
 $tsPolPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services'
 $policyValues = @('UserAuthentication', 'SecurityLayer', 'MinEncryptionLevel', 'fPromptForPassword', 'fEncryptRPCTraffic')
 
@@ -45,7 +45,7 @@ if (Test-Path $tsPolPath) {
 }
 
 # -- Step 2: Ensure RDP is enabled --
-Write-Host '  [2/7] Ensuring RDP is enabled...' -ForegroundColor Cyan
+Write-Host '  [2/6] Ensuring RDP is enabled...' -ForegroundColor Cyan
 $tsPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server'
 $fDeny = (Get-ItemProperty -Path $tsPath -Name 'fDenyTSConnections' -ErrorAction SilentlyContinue).fDenyTSConnections
 if ($fDeny -ne 0) {
@@ -56,7 +56,7 @@ if ($fDeny -ne 0) {
 }
 
 # -- Step 3: Reset WinStations listener --
-Write-Host '  [3/7] Resetting WinStations RDP-Tcp listener...' -ForegroundColor Cyan
+Write-Host '  [3/6] Resetting WinStations RDP-Tcp listener...' -ForegroundColor Cyan
 $rdpTcpPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp'
 if (Test-Path $rdpTcpPath) {
     $listenerNLA = (Get-ItemProperty -Path $rdpTcpPath -Name 'UserAuthentication' -ErrorAction SilentlyContinue).UserAuthentication
@@ -79,7 +79,7 @@ if (Test-Path $rdpTcpPath) {
 }
 
 # -- Step 4: Remove ENTIRE firewall policy tree (nuke all CIS firewall overrides) --
-Write-Host '  [4/7] Removing all firewall policy overrides...' -ForegroundColor Cyan
+Write-Host '  [4/6] Removing all firewall policy overrides...' -ForegroundColor Cyan
 
 $fwPolicyRoot = 'HKLM:\SOFTWARE\Policies\Microsoft\WindowsFirewall'
 if (Test-Path $fwPolicyRoot) {
@@ -118,7 +118,7 @@ try {
 } catch { }
 
 # -- Step 5: Enable firewall rules --
-Write-Host '  [5/7] Enabling Remote Desktop firewall rules...' -ForegroundColor Cyan
+Write-Host '  [5/6] Enabling Remote Desktop firewall rules...' -ForegroundColor Cyan
 try {
     Enable-NetFirewallRule -DisplayGroup 'Remote Desktop' -ErrorAction Stop
     $rdpRules = Get-NetFirewallRule -DisplayGroup 'Remote Desktop' | Where-Object { $_.Enabled -eq 'True' }
@@ -127,17 +127,8 @@ try {
     Write-Host "    !  Failed: $_" -ForegroundColor Red
 }
 
-# -- Step 6: Restart firewall service --
-Write-Host '  [6/7] Restarting Windows Firewall service...' -ForegroundColor Cyan
-try {
-    Restart-Service MpsSvc -Force -ErrorAction Stop
-    Write-Host '    +  MpsSvc restarted' -ForegroundColor Green
-} catch {
-    Write-Host "    !  Failed: $_" -ForegroundColor Red
-}
-
-# -- Step 7: Restart TermService --
-Write-Host '  [7/7] Restarting TermService...' -ForegroundColor Cyan
+# -- Step 6: Restart TermService --
+Write-Host '  [6/6] Restarting TermService...' -ForegroundColor Cyan
 try {
     Restart-Service TermService -Force -ErrorAction Stop
     Write-Host '    +  TermService restarted' -ForegroundColor Green
