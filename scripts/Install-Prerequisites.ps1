@@ -5,11 +5,15 @@
     Auto-detects the environment (Windows Server with AD, Windows Server standalone,
     Windows workstation) and installs only what is available and relevant.
     Must be run as Administrator.
+.PARAMETER Force
+    Skip interactive prompts (use defaults for all options).
 #>
 #Requires -RunAsAdministrator
 
 [CmdletBinding()]
-param()
+param(
+    [switch]$Force
+)
 
 $ErrorActionPreference = 'Stop'
 
@@ -68,10 +72,23 @@ if ($isServer) {
         'GPMC'                      # Group Policy Management Console
     )
 
+    $skipRsat = $false
     if (-not $isDomainJoined) {
-        Write-Status '!' 'RSAT will install but AD/GPO commands require a domain' Yellow
+        if (-not $Force) {
+            Write-Host ''
+            $rsatChoice = Read-Host '  ? RSAT tools (AD/GPO management) are not needed for standalone mode. Install anyway? [y/N]'
+            Write-Host ''
+            if ($rsatChoice -notmatch '^[Yy]') {
+                Write-Status '-' 'RSAT install skipped (standalone mode)' Yellow
+                $skipRsat = $true
+            }
+        } else {
+            Write-Status '-' 'RSAT install skipped (standalone mode, -Force default)' Yellow
+            $skipRsat = $true
+        }
     }
 
+    if (-not $skipRsat) {
     foreach ($feat in $features) {
         $installed = Get-WindowsFeature -Name $feat -ErrorAction SilentlyContinue
         if ($installed -and $installed.Installed) {
@@ -86,6 +103,7 @@ if ($isServer) {
             }
         }
     }
+    } # end if (-not $skipRsat)
     Write-Host ''
 } elseif ($isWindows) {
     Write-Host '  RSAT Optional Features' -ForegroundColor White

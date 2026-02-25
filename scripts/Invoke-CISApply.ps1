@@ -61,8 +61,21 @@ Import-Module $modulePath -Force
 Write-Host '  [1/7] Initializing...' -ForegroundColor Cyan
 $config = Initialize-CISEnvironment -ProjectRoot $ProjectRoot -SkipPrereqCheck:$SkipPrereqCheck
 
-# Override DryRun if explicitly passed
-$isDryRun = if ($null -ne $DryRun) { $DryRun } else { $config.DryRun }
+# -- Determine DryRun --
+$dryRunExplicit = $null -ne $DryRun
+if ($dryRunExplicit) {
+    $isDryRun = $DryRun
+} elseif (-not $Force) {
+    Write-Host ''
+    $modeChoice = Read-Host '  ? Run in DRY RUN (preview only) or LIVE mode? [D/l]'
+    if ($modeChoice -match '^[Ll]') {
+        $isDryRun = $false
+    } else {
+        $isDryRun = $true
+    }
+} else {
+    $isDryRun = $config.DryRun
+}
 
 # -- Detect domain membership --
 $isLocalMode = $false
@@ -131,10 +144,32 @@ if (-not $isLocalMode -and $config.HaltOnConnectivityFailure -and -not $SkipPrer
 }
 
 # -- Determine modules --
-$modulesToApply = if ($Modules) {
-    $Modules
+$enabledModules = @($config.Modules.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key })
+if ($Modules) {
+    $modulesToApply = $Modules
+} elseif (-not $Force) {
+    Write-Host ''
+    $modChoice = Read-Host '  ? Apply all enabled modules or select specific ones? [A/s]'
+    if ($modChoice -match '^[Ss]') {
+        Write-Host ''
+        Write-Host '  Enabled modules:' -ForegroundColor White
+        for ($i = 0; $i -lt $enabledModules.Count; $i++) {
+            Write-Host "    $($i + 1). $($enabledModules[$i])" -ForegroundColor Cyan
+        }
+        Write-Host ''
+        $picks = Read-Host '  Enter module numbers separated by commas (e.g. 1,3,5)'
+        $selectedIndices = $picks -split ',' | ForEach-Object { ($_.Trim()) -as [int] } | Where-Object { $_ -ge 1 -and $_ -le $enabledModules.Count }
+        if ($selectedIndices.Count -gt 0) {
+            $modulesToApply = @($selectedIndices | ForEach-Object { $enabledModules[$_ - 1] })
+        } else {
+            Write-Host '    !  No valid selection — using all enabled modules' -ForegroundColor Yellow
+            $modulesToApply = $enabledModules
+        }
+    } else {
+        $modulesToApply = $enabledModules
+    }
 } else {
-    $config.Modules.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key }
+    $modulesToApply = $enabledModules
 }
 
 # -- Backup current state --
@@ -237,7 +272,15 @@ if (-not $isDryRun) {
 }
 
 # -- Optional: harden firewall rules --
-if ($HardenFirewallRules) {
+$doHardenFirewall = [bool]$HardenFirewallRules
+if (-not $doHardenFirewall -and -not $Force) {
+    Write-Host ''
+    $fwChoice = Read-Host '  ? Disable unnecessary firewall rules (casting, mDNS, wireless display)? [y/N]'
+    if ($fwChoice -match '^[Yy]') {
+        $doHardenFirewall = $true
+    }
+}
+if ($doHardenFirewall) {
     Write-Host ''
     Write-Host '  Hardening firewall rules (disabling unnecessary services)...' -ForegroundColor Cyan
     $fwResults = Disable-UnnecessaryFirewallRules -DryRun $isDryRun

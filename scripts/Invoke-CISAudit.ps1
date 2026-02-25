@@ -11,6 +11,8 @@
     If omitted, all enabled modules from master-config are audited.
 .PARAMETER SkipPrereqCheck
     Skip prerequisite validation.
+.PARAMETER Force
+    Skip interactive prompts (use defaults for all options).
 #>
 [CmdletBinding()]
 param(
@@ -18,7 +20,9 @@ param(
 
     [string[]]$Modules,
 
-    [switch]$SkipPrereqCheck
+    [switch]$SkipPrereqCheck,
+
+    [switch]$Force
 )
 
 $ErrorActionPreference = 'Stop'
@@ -59,10 +63,32 @@ if ($isDomainJoined -and $config.HaltOnConnectivityFailure -and -not $SkipPrereq
 }
 
 # -- Determine which modules to audit --
-$modulesToAudit = if ($Modules) {
-    $Modules
+$enabledModules = @($config.Modules.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key })
+if ($Modules) {
+    $modulesToAudit = $Modules
+} elseif (-not $Force) {
+    Write-Host ''
+    $modChoice = Read-Host '  ? Audit all enabled modules or select specific ones? [A/s]'
+    if ($modChoice -match '^[Ss]') {
+        Write-Host ''
+        Write-Host '  Enabled modules:' -ForegroundColor White
+        for ($i = 0; $i -lt $enabledModules.Count; $i++) {
+            Write-Host "    $($i + 1). $($enabledModules[$i])" -ForegroundColor Cyan
+        }
+        Write-Host ''
+        $picks = Read-Host '  Enter module numbers separated by commas (e.g. 1,3,5)'
+        $selectedIndices = $picks -split ',' | ForEach-Object { ($_.Trim()) -as [int] } | Where-Object { $_ -ge 1 -and $_ -le $enabledModules.Count }
+        if ($selectedIndices.Count -gt 0) {
+            $modulesToAudit = @($selectedIndices | ForEach-Object { $enabledModules[$_ - 1] })
+        } else {
+            Write-Host '    !  No valid selection — using all enabled modules' -ForegroundColor Yellow
+            $modulesToAudit = $enabledModules
+        }
+    } else {
+        $modulesToAudit = $enabledModules
+    }
 } else {
-    $config.Modules.GetEnumerator() | Where-Object { $_.Value } | ForEach-Object { $_.Key }
+    $modulesToAudit = $enabledModules
 }
 
 # -- Run each module's Test function --
